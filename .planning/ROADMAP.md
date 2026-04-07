@@ -25,12 +25,14 @@ Record a meeting, get an accurate transcript and a useful summary — in your ow
 **Goal**: User preferences live in exactly one place with atomic writes that make invalid states (e.g. Arabic + Parakeet) unrepresentable.
 **Depends on**: Nothing (foundation phase — everything else reads from this)
 **Requirements**: PREFS-01, PREFS-02, PREFS-03, PREFS-04
+**Plans**: 1 plan
 **Success Criteria** (what must be TRUE):
   1. User can set their UI locale and have the value survive an app restart with no `useEffect` workaround in `ConfigContext.tsx` rehydrating it
   2. User running a recording immediately after switching `transcription_language` sees the new value honored on the *next* recording (no stale Rust process-global cache)
   3. User attempting to write `provider: 'parakeet'` while `ui_locale === 'ar'` is rejected by `set_user_preferences` before SQLite is touched — invariant enforced inside the same transaction
   4. User cannot observe a window where SQLite and the in-memory `RwLock` disagree (concurrent setter test passes)
-**Plans**: TBD
+**Plans**:
+- [ ] 01-01-PLAN.md — Preferences module, atomic setter with REAL reject branch (A1 Option B), T1..T5 tests, 4 call-site migration, ConfigContext desync workaround deletion, .backup cleanup (17 tasks across 6 commit-aligned waves)
 
 ### Phase 2: i18n Framework & Locale Bootstrap
 **Goal**: Users see the app in their language on first launch, with the correct font, document direction, and a clean reload-based language switch.
@@ -98,7 +100,7 @@ Record a meeting, get an accurate transcript and a useful summary — in your ow
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Preferences Foundation | 0/0 | Not started | — |
+| 1. Preferences Foundation | 0/1 | Planned | — |
 | 2. i18n Framework & Locale Bootstrap | 0/0 | Not started | — |
 | 3. RTL Layout Conversion | 0/0 | Not started | — |
 | 4. Arabic Transcription Policy | 0/0 | Not started | — |
