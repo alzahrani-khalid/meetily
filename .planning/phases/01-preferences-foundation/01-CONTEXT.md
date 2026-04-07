@@ -59,11 +59,26 @@ the same commit as the migration that eliminates its cause.
   - Frontend: `setUserPreferences(p: Partial<UserPreferences>): Promise<UserPreferences>`
   - Rust: `async fn set_user_preferences(patch: UserPreferencesPatch) -> Result<UserPreferences, String>`
     where every field is `Option<T>`.
-- **D-07:** Merge order inside `set_user_preferences`: acquire `RwLock` write guard →
-  read current state → merge `patch` over current (non-`None` fields win) → run
-  invariant (D-10..D-12) → write transaction → update RwLock → release guard →
-  return the merged result. No window where on-disk and in-memory disagree, no
-  window where a caller can observe half-applied state.
+- **D-07:** Merge order inside `set_user_preferences` (REVISED 2026-04-07 for
+  consistency with D-10/D-11 and RESEARCH Pitfall 2; the original draft held the
+  `RwLock` write guard across `.await`, which is a known tokio deadlock footgun
+  and contradicted the commit-then-cache rule in D-10/D-11): read current state
+  via a **short-lived** `PREFS_CACHE.read()` guard → clone + drop the guard →
+  merge `patch` over the cloned current (non-`None` fields win) → run invariant
+  (D-10..D-12) pre-flight (pure function, no locks, no I/O) → open sqlx
+  transaction, write `user_preferences` UPDATE (and conditionally
+  `transcript_settings` UPDATE per D-08) → `COMMIT` → **only after commit
+  succeeds**, acquire `PREFS_CACHE.write()` guard, assign `*guard = merged`,
+  drop the guard → return the merged result.
+  - No guard is ever held across an `.await` boundary (per RESEARCH Pitfall 2).
+  - On rollback or reject, the RwLock is never written — cache stays consistent
+    with disk (D-11, D-12).
+  - The "window" between `COMMIT` and `PREFS_CACHE.write()` is bounded by the
+    duration of a single uncontended write-lock acquisition (microseconds) and
+    is the T-1-02 threat item — mitigated (not eliminated) by tests T2/T3/T5.
+    The original D-07 draft claimed "no window" but held a lock across `.await`
+    to achieve that guarantee, which is unsafe. The revised D-07 prefers safety
+    and documents the bounded window.
 
 ### Parakeet-ban invariant (hybrid: auto-repoint + reject)
 - **D-08:** **Auto-repoint on locale change.** When the merge result flips
@@ -95,12 +110,21 @@ the same commit as the migration that eliminates its cause.
 
 ### Call-site migration
 - **D-13:** `get_language_preference_internal()` is **deleted**, not deprecated.
-  All 6 recording-path call sites migrate in a single commit to
+  All **4 LIVE** recording-path call sites migrate in a single commit to
   `preferences::read().transcription_language`:
   - `frontend/src-tauri/src/whisper_engine/commands.rs:396`
   - `frontend/src-tauri/src/whisper_engine/parallel_processor.rs:344`
   - `frontend/src-tauri/src/audio/transcription/worker.rs:449`
   - `frontend/src-tauri/src/audio/transcription/worker.rs:526`
+
+  *Reconciliation with REQUIREMENTS.md PREFS-03 "6+" wording:* The RESEARCH
+  call-site audit (2026-04-07) verified these are the only **4 compiled sites**.
+  The "6+" in REQUIREMENTS.md counts the 4 live sites above PLUS 2+ dead
+  references inside `audio/recording_commands.rs.backup` (non-compiled file,
+  wrong extension — Rust ignores it). Those dead references are eliminated by
+  **D-15's dedicated chore commit** (Phase 1 wave 6), not by source-level
+  substitution. Phase-level PREFS-03 acceptance is reached AFTER both the
+  4-site migration commit AND the `.backup` deletion commit have landed.
 - **D-14:** `set_language_preference` Tauri command at `lib.rs:376` is deleted
   along with the `LANGUAGE_PREFERENCE` global static. Frontend callers (if any
   remain) are updated to invoke `set_user_preferences({ transcriptionLanguage })`.
