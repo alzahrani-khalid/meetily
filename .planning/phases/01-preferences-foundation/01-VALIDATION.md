@@ -55,7 +55,7 @@ created: 2026-04-07
 | T1 (hydration) | 01 | 1 | PREFS-01 | — | Startup reads `ui_locale='ar'` from seeded SQLite row → `preferences::read().await.ui_locale == "ar"` immediately after `hydrate_from_db` returns | integration | `cargo test preferences::tests::hydration_reflects_seeded_row` | ❌ W0 | ⬜ pending |
 | T2 (atomic auto-repoint) | 01 | 2 | PREFS-02 | T-1-01 | `set_user_preferences({ui_locale:'ar'})` while `transcript_settings.provider='parakeet'` → BOTH rows updated in one commit, `RwLock` updated AFTER commit, `read().await.ui_locale=="ar"` | integration | `cargo test preferences::tests::atomic_write_auto_repoints_parakeet` | ❌ W0 | ⬜ pending |
 | T3 (rollback invariance) | 01 | 2 | PREFS-02 | T-1-02 | Force the `transcript_settings` UPDATE to fail via invalid column → `user_preferences` row unchanged AND `RwLock` unchanged AND error flows through `Result`, not `panic` | integration | `cargo test preferences::tests::rollback_leaves_cache_and_row_unchanged` | ❌ W0 | ⬜ pending |
-| T4 (reject branch) | 01 | 2 | PREFS-02 | T-1-03 | Direct patch `{provider:'parakeet'}` while `ui_locale=='ar'` → `Err(PreferencesError::InvalidCombination { .. })` matched by variant (NOT just "an error"), BEFORE `BEGIN` is issued. **See Open Question A1 below — scope may be scaffold-only for Phase 1.** | integration | `cargo test preferences::tests::reject_parakeet_while_arabic` | ❌ W0 | ⬜ pending |
+| T4 (reject branch) | 01 | 2 | PREFS-02 | T-1-03 | Direct patch `{provider:'parakeet'}` while `ui_locale=='ar'` → `Err(PreferencesError::InvalidCombination { .. })` matched by variant (NOT just "an error"), BEFORE `BEGIN` is issued. **A1 resolved: Option B — full implementation. `UserPreferencesPatch` gains a `provider` field (this phase), reject branch is real, not a stub.** | integration | `cargo test preferences::tests::reject_parakeet_while_arabic` | ❌ W0 | ⬜ pending |
 | T5 (concurrent setter) | 01 | 2 | PREFS-02 | T-1-04 | `tokio::try_join!(set1, set2)` with both futures started before any `.await` → no partial state, final result equals one of the two inputs, no deadlock within 2s | integration | `cargo test preferences::tests::concurrent_setters_serialize` | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
@@ -118,16 +118,25 @@ These rule out tests that would falsely pass. Plan-checker must verify each plan
 
 ---
 
-## Open Question (raised by RESEARCH, must be resolved before planning)
+## Open Question — RESOLVED
 
 **A1 — D-09 reject branch scope** (RESEARCH § Assumptions Log, assumption 1):
 
-D-09 says "reject before SQLite is touched"; D-01's `UserPreferencesPatch` has no `provider` field. Two resolutions:
+D-09 says "reject before SQLite is touched"; D-01's `UserPreferencesPatch` has no `provider` field.
 
-- **Option A (scaffold):** Phase 1 wires the invariant hook as a documented no-op with a `#[should_panic]`-style stub test; Phase 4 (TRANS-02) extends the patch with `provider` and replaces T4 with the real reject assertion. Keeps Phase 1 strictly additive to `user_preferences`.
-- **Option B (full implementation):** Phase 1 extends `UserPreferencesPatch` with optional `provider` tied to `transcript_settings`, and T4 asserts the real reject path. Expands Phase 1 scope into `transcript_settings` write surface.
+**Resolution (user decision, 2026-04-07):** **Option B — Full implementation now.**
 
-**Researcher's strong recommendation: Option A.** Plan-checker will block on this until resolved.
+Phase 1 extends `UserPreferencesPatch` with an optional `provider: Option<String>` field that writes to `transcript_settings.provider`. The reject branch is REAL, not a stub: attempting to patch `{provider: 'parakeet'}` while current `ui_locale == 'ar'` returns `Err(PreferencesError::InvalidCombination { .. })` before any SQL is issued. T4 asserts this by variant match.
+
+**Implications for the planner — MUST honor:**
+1. `UserPreferencesPatch` struct (D-01) gains `provider: Option<String>` tied to `transcript_settings.provider`.
+2. `set_user_preferences` now writes to two rows in the same transaction in the "patch carries provider" case — same atomic pattern as D-08's auto-repoint branch, but with the opposite direction (user-supplied provider vs auto-generated).
+3. `apply_patch_atomic` performs the invariant check *before* `BEGIN` so the reject returns without opening a transaction at all.
+4. Success criterion #3 is fully testable in Phase 1 (no deferral to Phase 4).
+5. **Phase 4 (TRANS-02) scope shrinks:** The `transcript_settings` write surface lands now. Phase 4 retains TRANS-02's UI-side concerns (hidden dropdown, banner, onboarding fork) but does not need to extend `UserPreferencesPatch` or add the reject path — those are already done. The planner should note this so Phase 4 isn't accidentally duplicated.
+6. **D-21 commit order** (from CONTEXT.md) may need a minor revision: commit 2 ("preferences/ module + Tauri commands + hydration") now also carries the extended patch shape. Commit 3 ("targeted Phase-1 tests") must include T4 as a real reject test.
+
+**Researcher's recommendation was Option A; user overrode to Option B with full awareness of the Phase 4 impact.**
 
 ---
 
@@ -139,6 +148,6 @@ D-09 says "reject before SQLite is touched"; D-01's `UserPreferencesPatch` has n
 - [ ] No watch-mode flags
 - [ ] Feedback latency < 10s (quick scope)
 - [ ] `nyquist_compliant: true` set in frontmatter *(flipped by plan-checker once task binding is verified)*
-- [ ] Open Question A1 resolved *(pending user decision, see above)*
+- [x] Open Question A1 resolved — Option B (full implementation), see § Open Question — RESOLVED
 
 **Approval:** pending
