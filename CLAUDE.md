@@ -2,6 +2,36 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## GSD Workflow — Active
+
+This repo uses [GSD (Get Shit Done)](https://github.com/tylerlwsmith/gsd) planning workflows. Before taking on any non-trivial change, read the current planning state:
+
+- **`.planning/PROJECT.md`** — living project context: what Meetily is, core value, Validated / Active / Out of Scope requirements, constraints, key decisions
+- **`.planning/REQUIREMENTS.md`** — current milestone's checkable requirements with REQ-IDs and phase traceability
+- **`.planning/ROADMAP.md`** — phase breakdown for the active milestone, goals, success criteria, dependencies
+- **`.planning/STATE.md`** — current position: active phase, active plan, status, accumulated context
+- **`.planning/config.json`** — workflow configuration (mode, granularity, parallelization, agent toggles, model profile)
+- **`.planning/codebase/`** — static analysis of the Meetily codebase (STACK / ARCHITECTURE / STRUCTURE / CONVENTIONS / INTEGRATIONS / TESTING / CONCERNS), refreshed via `/gsd-map-codebase`
+- **`.planning/research/`** — domain research per phase (if the phase runs `/gsd-research-phase`)
+- **`.planning/phases/NN-*/`** — per-phase artifacts: RESEARCH.md, DISCUSS.md, PLAN.md, VERIFICATION.md, REVIEW.md
+
+**Current milestone:** v1.0 — Arabic Bilingual Support (6 phases, 30 requirements). Source spec at `docs/superpowers/specs/2026-04-07-arabic-bilingual-support-design-v2.md`.
+
+**Common GSD commands** (typed directly as slash commands in Claude Code):
+- `/gsd-progress` — show current status and recommend next action
+- `/gsd-discuss-phase N` — gather context and clarify approach before planning phase N
+- `/gsd-plan-phase N` — create PLAN.md for phase N (with research + plan-check if enabled in config)
+- `/gsd-execute-phase N` — execute all plans in phase N with atomic commits
+- `/gsd-verify-work` — conversational UAT against phase requirements
+- `/gsd-code-review` — review source files touched during a phase
+- `/gsd-transition` — mark current phase complete and evolve PROJECT.md / STATE.md / REQUIREMENTS.md
+
+**When working inside a GSD phase:**
+1. Never make ad-hoc scope changes — add to PROJECT.md Out of Scope or propose a requirement addition with rationale
+2. Each plan's commits should be atomic and reference the REQ-ID they satisfy
+3. If you discover that a requirement is wrong, call `/gsd-add-todo` and surface it; don't silently redefine the phase
+4. Phase success criteria in ROADMAP.md are the "done" bar — meet them before `/gsd-transition`
+
 ## Project Overview
 
 **Meetily** is a privacy-first AI meeting assistant that captures, transcribes, and summarizes meetings entirely on local infrastructure. The project consists of two main components:

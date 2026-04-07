@@ -88,46 +88,46 @@ Explicitly excluded. Documented to prevent scope creep.
 
 ## Traceability
 
-Which phases cover which requirements. Populated by the roadmapper during Step 8.
+Which phases cover which requirements. Populated by the roadmapper.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PREFS-01 | — | Pending |
-| PREFS-02 | — | Pending |
-| PREFS-03 | — | Pending |
-| PREFS-04 | — | Pending |
-| UI-01 | — | Pending |
-| UI-02 | — | Pending |
-| UI-03 | — | Pending |
-| UI-04 | — | Pending |
-| UI-05 | — | Pending |
-| UI-06 | — | Pending |
-| UI-07 | — | Pending |
-| TRANS-01 | — | Pending |
-| TRANS-02 | — | Pending |
-| TRANS-03 | — | Pending |
-| TRANS-04 | — | Pending |
-| TPL-01 | — | Pending |
-| TPL-02 | — | Pending |
-| TPL-03 | — | Pending |
-| TPL-04 | — | Pending |
-| SUMM-01 | — | Pending |
-| SUMM-02 | — | Pending |
-| SUMM-03 | — | Pending |
-| SUMM-04 | — | Pending |
-| QA-01 | — | Pending |
-| QA-02 | — | Pending |
-| QA-03 | — | Pending |
-| QA-04 | — | Pending |
-| QA-05 | — | Pending |
-| QA-06 | — | Pending |
-| QA-07 | — | Pending |
+| PREFS-01 | Phase 1 | Pending |
+| PREFS-02 | Phase 1 | Pending |
+| PREFS-03 | Phase 1 | Pending |
+| PREFS-04 | Phase 1 | Pending |
+| UI-01 | Phase 2 | Pending |
+| UI-02 | Phase 2 | Pending |
+| UI-03 | Phase 2 | Pending |
+| UI-04 | Phase 2 | Pending |
+| UI-05 | Phase 3 | Pending |
+| UI-06 | Phase 3 | Pending |
+| UI-07 | Phase 6 | Pending |
+| TRANS-01 | Phase 4 | Pending |
+| TRANS-02 | Phase 4 | Pending |
+| TRANS-03 | Phase 4 | Pending |
+| TRANS-04 | Phase 4 | Pending |
+| TPL-01 | Phase 5 | Pending |
+| TPL-02 | Phase 5 | Pending |
+| TPL-03 | Phase 5 | Pending |
+| TPL-04 | Phase 5 | Pending |
+| SUMM-01 | Phase 5 | Pending |
+| SUMM-02 | Phase 5 | Pending |
+| SUMM-03 | Phase 5 | Pending |
+| SUMM-04 | Phase 5 | Pending |
+| QA-01 | Phase 6 | Pending |
+| QA-02 | Phase 6 | Pending |
+| QA-03 | Phase 6 | Pending |
+| QA-04 | Phase 6 | Pending |
+| QA-05 | Phase 6 | Pending |
+| QA-06 | Phase 6 | Pending |
+| QA-07 | Phase 3 | Pending |
 
 **Coverage:**
 - v1 requirements: 30 total
-- Mapped to phases: 0 (populated by roadmapper)
-- Unmapped: 30 ⚠️ (will resolve after Step 8)
+- Mapped to phases: 30
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-07*
-*Last updated: 2026-04-07 after initial definition*
+*Last updated: 2026-04-07 — traceability populated by roadmapper (6 phases, 30/30 mapped)*
