@@ -1,7 +1,8 @@
 //! Single source of truth for user preferences.
 //!
 //! Replaces the legacy 4-way split between React state / localStorage /
-//! `lib.rs::LANGUAGE_PREFERENCE` process-global / SQLite `settings` table.
+//! the old Rust process-global language-preference static / SQLite
+//! `settings` table.
 //!
 //! Architecture:
 //! - `PREFS_CACHE` is a process-global `Lazy<RwLock<UserPreferences>>` hydrated
