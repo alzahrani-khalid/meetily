@@ -20,9 +20,10 @@ pub mod repository;
 #[cfg(test)]
 mod tests;
 
+use std::sync::RwLock;
+
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
-use tokio::sync::RwLock;
 
 /// User preferences row (singleton, `id = '1'`).
 ///
@@ -106,18 +107,31 @@ pub(crate) static PREFS_CACHE: Lazy<RwLock<UserPreferences>> = Lazy::new(|| {
 /// `tauri::async_runtime::block_on`) BEFORE command registration completes,
 /// so the first `get_user_preferences` invocation always resolves against a
 /// populated cache. Uses `block_on` (not `spawn`) per RESEARCH Pitfall 4.
+///
+/// Note on lock flavor (D-04 Claude Discretion): `PREFS_CACHE` is a
+/// `std::sync::RwLock`, not `tokio::sync::RwLock`. This lets `read()` work
+/// from both sync (audio hot path) and async (Tauri commands, tests)
+/// contexts without risking tokio's "cannot block from within runtime"
+/// panic. Writes are rare (one per settings change), so stdlib semantics
+/// are adequate. Guards are NEVER held across `.await` points.
 pub async fn hydrate_from_db(pool: &sqlx::SqlitePool) -> anyhow::Result<()> {
     let loaded = repository::load(pool).await?;
-    {
-        let mut guard = PREFS_CACHE.write().await;
+    let (ui_locale, summary_language, transcription_language) = {
+        let mut guard = PREFS_CACHE
+            .write()
+            .expect("PREFS_CACHE poisoned");
         *guard = loaded;
-    }
-    let prefs = PREFS_CACHE.read().await;
+        (
+            guard.ui_locale.clone(),
+            guard.summary_language.clone(),
+            guard.transcription_language.clone(),
+        )
+    };
     log::info!(
         "preferences hydrated from db: ui_locale={}, summary_language={}, transcription_language={}",
-        prefs.ui_locale,
-        prefs.summary_language,
-        prefs.transcription_language
+        ui_locale,
+        summary_language,
+        transcription_language
     );
     Ok(())
 }
@@ -125,12 +139,15 @@ pub async fn hydrate_from_db(pool: &sqlx::SqlitePool) -> anyhow::Result<()> {
 /// Synchronous reader for the audio hot-path. Returns an owned clone;
 /// callers MUST NOT hold any guard across `.await` points.
 ///
-/// Uses `blocking_read()` which is safe here because:
-/// 1. Writes happen only from `set_user_preferences` (a Tauri command handler,
-///    not the audio hot path), so contention is rare.
-/// 2. Returning an owned clone means the read guard is dropped before return.
+/// Works from both sync (audio hot path) and async (Tauri commands, tests)
+/// contexts because `PREFS_CACHE` is a `std::sync::RwLock` — stdlib
+/// primitives don't integrate with tokio's "cannot block from within
+/// runtime" check.
 pub fn read() -> UserPreferences {
-    PREFS_CACHE.blocking_read().clone()
+    PREFS_CACHE
+        .read()
+        .expect("PREFS_CACHE poisoned")
+        .clone()
 }
 
 /// Invariant checks for the Parakeet-ban hybrid rule.

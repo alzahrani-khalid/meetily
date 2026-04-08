@@ -14,7 +14,10 @@ use super::{PreferencesError, UserPreferences, UserPreferencesPatch, PREFS_CACHE
 
 #[tauri::command]
 pub async fn get_user_preferences() -> Result<UserPreferences, String> {
-    Ok(PREFS_CACHE.read().await.clone())
+    Ok(PREFS_CACHE
+        .read()
+        .map_err(|_| "PREFS_CACHE poisoned".to_string())?
+        .clone())
 }
 
 #[tauri::command]
@@ -37,8 +40,13 @@ pub async fn set_user_preferences(
     // Ok, which means tx.commit() already succeeded. If this order is
     // inverted, T3 (rollback invariance) will fail because on tx failure the
     // cache must be untouched.
+    //
+    // Uses std::sync::RwLock (not tokio) per D-04 — the guard is acquired
+    // and dropped inline, NEVER held across an .await boundary.
     {
-        let mut guard = PREFS_CACHE.write().await;
+        let mut guard = PREFS_CACHE
+            .write()
+            .map_err(|_| "PREFS_CACHE poisoned".to_string())?;
         *guard = merged.clone();
     }
 
