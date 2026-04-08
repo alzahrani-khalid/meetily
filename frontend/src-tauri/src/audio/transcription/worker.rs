@@ -445,8 +445,8 @@ async fn transcribe_chunk_with_provider<R: Runtime>(
     // Transcribe using the appropriate engine (with improved error handling)
     match engine {
         TranscriptionEngine::Whisper(whisper_engine) => {
-            // Get language preference from global state
-            let language = crate::get_language_preference_internal();
+            // Get language preference from the new preferences module (PREFS-03)
+            let language = Some(crate::preferences::read().transcription_language);
 
             match whisper_engine
                 .transcribe_audio_with_confidence(speech_samples, language)
@@ -523,7 +523,8 @@ async fn transcribe_chunk_with_provider<R: Runtime>(
         }
         TranscriptionEngine::Provider(provider) => {
             // NEW: Trait-based provider (clean, unified interface)
-            let language = crate::get_language_preference_internal();
+            // PREFS-03: read from the new preferences module
+            let language = Some(crate::preferences::read().transcription_language);
 
             match provider.transcribe(speech_samples, language).await {
                 Ok(result) => {

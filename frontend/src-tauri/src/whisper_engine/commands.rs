@@ -392,8 +392,8 @@ pub async fn whisper_transcribe_audio(audio_data: Vec<f32>) -> Result<String, St
     };
 
     if let Some(engine) = engine {
-        // Get language preference
-        let language = crate::get_language_preference_internal();
+        // Get language preference from the new preferences module (PREFS-03)
+        let language = Some(crate::preferences::read().transcription_language);
         engine
             .transcribe_audio(audio_data, language)
             .await

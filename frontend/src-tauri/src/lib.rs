@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Mutex as StdMutex;
 // Removed unused import
 
 // Performance optimization: Conditional logging macros for hot paths
@@ -64,10 +63,6 @@ use tauri::{AppHandle, Manager, Runtime};
 use tokio::sync::RwLock;
 
 static RECORDING_FLAG: AtomicBool = AtomicBool::new(false);
-
-// Global language preference storage (default to "auto-translate" for automatic translation to English)
-static LANGUAGE_PREFERENCE: std::sync::LazyLock<StdMutex<String>> =
-    std::sync::LazyLock::new(|| StdMutex::new("auto-translate".to_string()));
 
 #[derive(Debug, Deserialize)]
 struct RecordingArgs {
@@ -373,21 +368,6 @@ async fn start_recording_with_devices_and_meeting<R: Runtime>(
     }
 }
 
-#[tauri::command]
-async fn set_language_preference(language: String) -> Result<(), String> {
-    let mut lang_pref = LANGUAGE_PREFERENCE
-        .lock()
-        .map_err(|e| format!("Failed to set language preference: {}", e))?;
-    log_info!("Setting language preference to: {}", language);
-    *lang_pref = language;
-    Ok(())
-}
-
-// Internal helper function to get language preference (for use within Rust code)
-pub fn get_language_preference_internal() -> Option<String> {
-    LANGUAGE_PREFERENCE.lock().ok().map(|lang| lang.clone())
-}
-
 pub fn run() {
     log::set_max_level(log::LevelFilter::Info);
 
@@ -670,9 +650,7 @@ pub fn run() {
             audio::recording_preferences::get_current_audio_backend,
             audio::recording_preferences::set_audio_backend,
             audio::recording_preferences::get_audio_backend_info,
-            // Language preference commands
-            set_language_preference,
-            // User preferences commands (PREFS-01, PREFS-02)
+            // User preferences commands (PREFS-01, PREFS-02, PREFS-03)
             preferences::commands::get_user_preferences,
             preferences::commands::set_user_preferences,
             // Notification system commands
