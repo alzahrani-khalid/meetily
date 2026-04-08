@@ -27,13 +27,13 @@ Record a meeting, get an accurate transcript and a useful summary — in your ow
 - ✓ Onboarding flow with model download (Parakeet by default) — existing
 - ✓ BlockNote rich-text editor for summary editing — existing (Inter font, no RTL config today)
 - ✓ All audio/transcription processing happens locally; no cloud transcription path — existing
+- ✓ Single-source-of-truth user preferences model (SQLite `user_preferences` table, Rust module, `get_user_preferences` / `set_user_preferences` Tauri commands) — Validated in Phase 01: Preferences Foundation
+- ✓ 4 recording-path call sites migrated from `get_language_preference_internal()` to `preferences::read()`; `LANGUAGE_PREFERENCE` process-global + `ConfigContext.tsx:215` startup-desync `useEffect` workaround deleted — Validated in Phase 01: Preferences Foundation
 
 ### Active
 
 <!-- Milestone v1.0: Arabic bilingual support. Derived from docs/superpowers/specs/2026-04-07-arabic-bilingual-support-design-v2.md. -->
 
-- [ ] Single-source-of-truth user preferences model (SQLite `user_preferences` table, Rust module, two Tauri commands) replacing the 4-way split between React state / `localStorage` / Rust process-global / SQLite `settings` table
-- [ ] Migrate 6+ recording-path call sites from `get_language_preference_internal()` to `preferences::read()` and delete the startup-desync `useEffect` workaround at `ConfigContext.tsx:215`
 - [ ] `next-intl` client-provider i18n framework with `en` + `ar` message catalogues and `<html lang dir>` switch driven by preferences
 - [ ] Arabic-capable font loading (Tajawal via `next/font/google`) alongside existing `Source_Sans_3`
 - [ ] RTL layout conversion across 286 directional Tailwind hits in 65 `.tsx` files using logical properties (`ms-*`, `me-*`, `ps-*`, `pe-*`, `start-*`, `end-*`, `text-start`, `text-end`, `border-s-*`, `border-e-*`, `rounded-s-*`, `rounded-e-*`, `rtl:space-x-reverse`)
@@ -41,7 +41,7 @@ Record a meeting, get an accurate transcript and a useful summary — in your ow
 - [ ] Sidebar collapse animation branched on `dir` (logical properties don't exist for `translate-x`)
 - [ ] BlockNote RTL spike answering: does 0.36.0 support `dir="rtl"`, can it be forced via CSS, does Inter break Arabic glyphs, does `@blocknote/shadcn` expose a `dictionary` prop
 - [ ] Arabic transcription via Whisper large-v3 only (smaller models hallucinate in Arabic)
-- [ ] Parakeet ban for Arabic enforced as a policy invariant inside `set_user_preferences` — invalid state unrepresentable
+- [x] Parakeet ban for Arabic enforced as a policy invariant inside `set_user_preferences` — invalid state unrepresentable — Validated in Phase 01 (A1 Option B full reject, `repository::apply_patch_atomic` step C)
 - [ ] Onboarding fork: `ui_locale === 'ar'` downloads Whisper large-v3 instead of Parakeet, non-blocking with a "ready to record" gate
 - [ ] `TranscriptSettings` filters Parakeet out when `uiLocale === 'ar'` and shows an explanatory banner
 - [ ] Extend `load_bundled_template` / `load_custom_template` with locale-suffix resolution: try `{id}.{locale}.json` first, fall back to `{id}.json`, at every tier
@@ -115,11 +115,11 @@ Record a meeting, get an accurate transcript and a useful summary — in your ow
 |----------|-----------|---------|
 | Full bilingual (AR + EN), not AR-only | Preserve existing English user base | — Pending |
 | `next-intl` client-only mode (not server components) | Root layout is already `'use client'`; `NextIntlClientProvider` at `layout.tsx` wraps the existing tree | — Pending |
-| Single SQLite `user_preferences` row + Rust `preferences` module as source of truth | Kills 4-way desync; enforces atomicity for Parakeet-ban invariant; deletes `ConfigContext.tsx:215` workaround | — Pending |
+| Single SQLite `user_preferences` row + Rust `preferences` module as source of truth | Kills 4-way desync; enforces atomicity for Parakeet-ban invariant; deletes `ConfigContext.tsx:215` workaround | ✓ Shipped in Phase 01 |
 | Tailwind logical properties + `dir={locale==='ar'?'rtl':'ltr'}` on `<html>` | Matches project-wide RTL rule; no manual flexDirection flipping; no `.reverse()` | — Pending |
 | Tajawal font via `next/font/google` | Same loading mechanism as `Source_Sans_3`; stable build | — Pending |
 | Whisper `large-v3` is the only Arabic transcription model | Smaller models hallucinate; Parakeet has no Arabic support | — Pending |
-| Parakeet ban for Arabic enforced in `set_user_preferences`, not in UI | Invalid state unrepresentable; no UI code needs to "remember" the rule | — Pending |
+| Parakeet ban for Arabic enforced in `set_user_preferences`, not in UI | Invalid state unrepresentable; no UI code needs to "remember" the rule | ✓ Shipped in Phase 01 (A1 Option B full reject branch, pre-`pool.begin().await`) |
 | Summary language independent from UI locale | An English-speaking team might want Arabic summaries for an Arabic meeting (or vice versa); already correct in v1 | — Pending |
 | LLM prompts externalized to `frontend/src-tauri/prompts/*.txt` with locale suffix | Currently hardcoded in `processor.rs`; externalize once instead of translating inline every tuning pass | — Pending |
 | Template locale resolution via filename suffix inside existing loader, not folder duplication | Reuses `custom → bundled → builtin` fallback chain; no loader rewrite | — Pending |
@@ -149,5 +149,9 @@ This document evolves at phase transitions and milestone boundaries.
 3. Audit Out of Scope — reasons still valid?
 4. Update Context with current state
 
+## Current State
+
+**Milestone v1.0 — Arabic Bilingual Support**: Phase 01 (Preferences Foundation) complete — single-source-of-truth `user_preferences` SQLite storage shipped with the atomic Parakeet+Arabic reject invariant, 4 recording-path call sites migrated, and the `ConfigContext.tsx:215` desync workaround removed. Phases 2–6 remain. Two HUMAN-UAT items from Phase 01 persist as partial (M1 restart persistence, M3 next-recording language) pending a live Tauri app run.
+
 ---
-*Last updated: 2026-04-07 after initialization*
+*Last updated: 2026-04-08 after Phase 01 completion*
