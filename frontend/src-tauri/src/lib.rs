@@ -49,6 +49,7 @@ pub mod anthropic;
 pub mod groq;
 pub mod openrouter;
 pub mod parakeet_engine;
+pub mod preferences;
 pub mod state;
 pub mod summary;
 pub mod tray;
@@ -484,6 +485,17 @@ pub fn run() {
             })
             .expect("Failed to initialize database");
 
+            // Hydrate preferences cache from SQLite. Must run AFTER
+            // initialize_database_on_startup (which installs AppState with
+            // db_manager) and BEFORE the setup closure returns (so command
+            // registration sees a populated cache). Uses block_on (not spawn)
+            // per RESEARCH Pitfall 4 to avoid a cache-race on the first read.
+            tauri::async_runtime::block_on(async {
+                let state = _app.handle().state::<crate::state::AppState>();
+                preferences::hydrate_from_db(state.db_manager.pool()).await
+            })
+            .expect("Failed to hydrate user preferences");
+
             // Initialize bundled templates directory for dynamic template discovery
             log::info!("Initializing bundled templates directory...");
             if let Ok(resource_path) = _app.handle().path().resource_dir() {
@@ -660,6 +672,9 @@ pub fn run() {
             audio::recording_preferences::get_audio_backend_info,
             // Language preference commands
             set_language_preference,
+            // User preferences commands (PREFS-01, PREFS-02)
+            preferences::commands::get_user_preferences,
+            preferences::commands::set_user_preferences,
             // Notification system commands
             notifications::commands::get_notification_settings,
             notifications::commands::set_notification_settings,
