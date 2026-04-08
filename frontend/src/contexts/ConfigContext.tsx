@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { TranscriptModelProps } from '@/components/TranscriptSettings';
 import { SelectedDevices } from '@/components/DeviceSelection';
 import { configService, ModelConfig } from '@/services/configService';
+import { getUserPreferences, setUserPreferences } from '@/services/preferencesService';
 import { invoke } from '@tauri-apps/api/core';
 import Analytics from '@/lib/analytics';
 import { BetaFeatures, BetaFeatureKey, loadBetaFeatures, saveBetaFeatures } from '@/types/betaFeatures';
@@ -136,14 +137,11 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     systemDevice: null
   });
 
-  // Language preference state
-  const [selectedLanguage, setSelectedLanguage] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('primaryLanguage');
-      return saved || 'auto';
-    }
-    return 'auto';
-  });
+  // Language preference state — hydrated from SQLite on mount via
+  // getUserPreferences() (see mount effect below). Default 'auto' until
+  // the first getUserPreferences() response lands. PREFS-01/PREFS-04:
+  // replaces the legacy localStorage-backed initializer.
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('auto');
 
   // UI preferences state
   const [showConfidenceIndicator, setShowConfidenceIndicator] = useState<boolean>(() => {
@@ -211,18 +209,24 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     loadTranscriptConfig();
   }, []);
 
-  // Sync language preference to Rust on mount (fixes startup desync bug)
+  // Hydrate user preferences from SQLite via the new preferences service.
+  // Replaces the legacy ':215 useEffect' startup-desync workaround — its
+  // cause (the 4-way preferences desync) is removed in the same commit
+  // per D-18 / PROJECT.md Constraints.
   useEffect(() => {
-    if (selectedLanguage) {
-      invoke('set_language_preference', { language: selectedLanguage })
-        .then(() => {
-          console.log('[ConfigContext] Synced language preference to Rust on startup:', selectedLanguage);
-        })
-        .catch(err => {
-          console.error('[ConfigContext] Failed to sync language preference to Rust on startup:', err);
-        });
-    }
-  }, []); 
+    let cancelled = false;
+    (async () => {
+      try {
+        const prefs = await getUserPreferences();
+        if (cancelled) return;
+        setSelectedLanguage(prefs.transcriptionLanguage);
+        // (Phase 2 will also hydrate prefs.uiLocale and prefs.summaryLanguage here)
+      } catch (err) {
+        console.error('[ConfigContext] Failed to load user preferences:', err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   // Load model configuration on mount
   useEffect(() => {
@@ -470,16 +474,18 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Wrapper for setSelectedLanguage that persists to localStorage and syncs to Rust
-  const handleSetSelectedLanguage = useCallback((lang: string) => {
-    setSelectedLanguage(lang);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('primaryLanguage', lang);
+  // Wrapper for setSelectedLanguage that persists via the preferences
+  // service (single source of truth — SQLite + Rust cache + React state,
+  // all updated atomically through set_user_preferences). PREFS-04:
+  // the legacy localStorage key is no longer written; any existing
+  // residue is left in place (D-19) and simply never read again.
+  const handleSetSelectedLanguage = useCallback(async (lang: string) => {
+    try {
+      const updated = await setUserPreferences({ transcriptionLanguage: lang });
+      setSelectedLanguage(updated.transcriptionLanguage);
+    } catch (err) {
+      console.error('[ConfigContext] Failed to save transcription language:', err);
     }
-    // Sync with Rust in-memory state for live recording
-    invoke('set_language_preference', { language: lang }).catch(err =>
-      console.error('Failed to sync language preference to Rust:', err)
-    );
   }, []);
 
   const value: ConfigContextType = useMemo(() => ({
