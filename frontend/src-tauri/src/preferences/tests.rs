@@ -9,9 +9,31 @@
 //! 3. Concurrent tests use try_join! with futures built before any .await
 //! 4. Rollback forced via invalid SQL (DROP TABLE), not panic!
 //! 5. Error assertions via variant match, not generic is_err()
+//!
+//! Test isolation: `PREFS_CACHE` is a process-global `Lazy<RwLock<_>>`, so
+//! every test that calls `hydrate_from_db` or reads/writes the cache MUST
+//! acquire `prefs_test_lock()` first. Without this, cargo test's default
+//! parallelism races hydrate_from_db across pools and breaks cache
+//! assertions. Using `tokio::sync::Mutex` (not `std::sync::Mutex`) so the
+//! guard is `Send` across `.await` boundaries inside `#[tokio::test]`.
 
 use super::*;
 use sqlx::SqlitePool;
+use std::sync::OnceLock;
+use tokio::sync::{Mutex, MutexGuard};
+
+/// Serializes access to the process-global `PREFS_CACHE` across tests.
+/// Every test that hydrates or reads the cache acquires this at its start.
+fn prefs_test_lock() -> &'static Mutex<()> {
+    static LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+    LOCK.get_or_init(|| Mutex::new(()))
+}
+
+/// Acquire the cross-test PREFS_CACHE mutex. Hold the returned guard for the
+/// full duration of the test body.
+async fn lock_prefs_cache() -> MutexGuard<'static, ()> {
+    prefs_test_lock().lock().await
+}
 
 /// Builds an in-memory SQLite pool with:
 /// (1) The real Phase 1 migration executed via include_str! — no hand-written duplicate.
@@ -75,6 +97,7 @@ pub(crate) async fn test_pool_with_migration() -> SqlitePool {
 
 #[tokio::test]
 async fn hydration_reflects_seeded_row() {
+    let _guard = lock_prefs_cache().await;
     let pool = test_pool_with_migration().await;
 
     // Seed arabic state BEFORE hydration — the test simulates "user previously
@@ -102,6 +125,7 @@ async fn hydration_reflects_seeded_row() {
 
 #[tokio::test]
 async fn atomic_write_auto_repoints_parakeet() {
+    let _guard = lock_prefs_cache().await;
     let pool = test_pool_with_migration().await;
     hydrate_from_db(&pool).await.expect("hydrate");
 
@@ -149,6 +173,7 @@ async fn atomic_write_auto_repoints_parakeet() {
 
 #[tokio::test]
 async fn rollback_leaves_cache_and_row_unchanged() {
+    let _guard = lock_prefs_cache().await;
     let pool = test_pool_with_migration().await;
     hydrate_from_db(&pool).await.expect("hydrate");
 
@@ -201,6 +226,7 @@ async fn rollback_leaves_cache_and_row_unchanged() {
 
 #[tokio::test]
 async fn reject_parakeet_while_arabic() {
+    let _guard = lock_prefs_cache().await;
     let pool = test_pool_with_migration().await;
 
     // Seed arabic state
@@ -250,6 +276,7 @@ async fn reject_parakeet_while_arabic() {
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn concurrent_setters_serialize() {
+    let _guard = lock_prefs_cache().await;
     let pool = test_pool_with_migration().await;
     hydrate_from_db(&pool).await.expect("hydrate");
 
