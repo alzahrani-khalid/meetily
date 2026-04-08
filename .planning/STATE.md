@@ -1,3 +1,18 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: planning
+last_updated: "2026-04-08T20:12:24.477Z"
+last_activity: 2026-04-08
+progress:
+  total_phases: 6
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
+  percent: 100
+---
+
 # Project State
 
 ## Project Reference
@@ -10,10 +25,10 @@ See: `.planning/PROJECT.md` (updated 2026-04-07)
 
 ## Current Position
 
-**Phase:** 01 — preferences-foundation
-**Plan:** `01-01-PLAN.md` (17 tasks, 6 waves, bound to T1..T5 Nyquist tests)
-**Status:** Planned — plan-checker PASSED on iteration 2 after 1 revision (4 HIGH + 2 MEDIUM + 1 LOW fixes). Ready for `/gsd-execute-phase 1`.
-**Last activity:** 2026-04-07 — Phase 1 plan approved (`f8b3bde`)
+**Phase:** 2
+**Plan:** Not started
+**Status:** Ready to plan
+**Last activity:** 2026-04-08
 
 **Progress:** `[▓░░░░░░░░░░░░░░░░░░░] 0/6 phases complete · 1/6 planned`
 
@@ -61,6 +76,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-07)
 **Next action:** `/clear` then `/gsd-execute-phase 1` — runs the 17 tasks in 6 strictly-sequential waves following D-21's commit order (migration → module + patch + hydration → targeted tests → call-site migration → frontend migration → .backup cleanup).
 
 **Watch-outs to remember:**
+
 - Phase 1 is the **highest-risk single phase** (ROADMAP risk note #2) — T1..T5 tests MUST ship alongside the implementation, in the same commit stream
 - **A1 Option B in effect** — Phase 1 now owns `UserPreferencesPatch.provider` and the `transcript_settings` write surface; Phase 4's TRANS-02/TRANS-04 scope is correspondingly reduced (UI concerns only)
 - **D-07 post-commit cache ordering is load-bearing** — any executor change to `commands.rs` that inverts the `apply_patch_atomic` → `PREFS_CACHE.write()` order breaks T3 rollback invariance

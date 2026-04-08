@@ -32,7 +32,7 @@ Record a meeting, get an accurate transcript and a useful summary — in your ow
   3. User attempting to write `provider: 'parakeet'` while `ui_locale === 'ar'` is rejected by `set_user_preferences` before SQLite is touched — invariant enforced inside the same transaction
   4. User cannot observe a window where SQLite and the in-memory `RwLock` disagree (concurrent setter test passes)
 **Plans**:
-- [ ] 01-01-PLAN.md — Preferences module, atomic setter with REAL reject branch (A1 Option B), T1..T5 tests, 4 call-site migration, ConfigContext desync workaround deletion, .backup cleanup (17 tasks across 6 commit-aligned waves)
+- [x] 01-01-PLAN.md — Preferences module, atomic setter with REAL reject branch (A1 Option B), T1..T5 tests, 4 call-site migration, ConfigContext desync workaround deletion, .backup cleanup (17 tasks across 6 commit-aligned waves)
 
 ### Phase 2: i18n Framework & Locale Bootstrap
 **Goal**: Users see the app in their language on first launch, with the correct font, document direction, and a clean reload-based language switch.
