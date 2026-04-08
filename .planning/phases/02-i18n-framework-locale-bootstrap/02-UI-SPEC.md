@@ -1,7 +1,8 @@
 ---
 phase: 2
 slug: i18n-framework-locale-bootstrap
-status: draft
+status: approved
+reviewed_at: 2026-04-08
 shadcn_initialized: true
 preset: "new-york / neutral / cssVariables / lucide"
 created: 2026-04-08
