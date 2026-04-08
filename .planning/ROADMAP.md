@@ -43,7 +43,12 @@ Record a meeting, get an accurate transcript and a useful summary — in your ow
   2. User sees Arabic text rendered in Tajawal (loaded via `next/font/google`) and English in Source Sans 3 — neither leaks into the other locale
   3. User opens Settings, switches language, confirms — the app performs a full reload and the new locale is active on the next mount, persisted across subsequent restarts
   4. User on first paint never sees a flash of LTR English chrome before Arabic loads (boot splash gates the provider tree until preferences resolve)
-**Plans**: TBD
+**Plans**: 5 plans
+- [ ] 02-01-PLAN.md — DB layer: bootstrapped column migration + Rust struct + TypeScript type (UI-01, UI-03)
+- [ ] 02-02-PLAN.md — bootstrapLocale pure helper + Vitest T2-01..T2-06 test suite (UI-01)
+- [ ] 02-03-PLAN.md — next-intl install + I18nProvider + messages/en.json + messages/ar.json + shadcn alert-dialog/radio-group (UI-02)
+- [ ] 02-04-PLAN.md — Layout integration: Tajawal font + bootstrap useEffect + I18nProvider wire + globals.css dir selectors + ConfigProvider initialPreferences prop (UI-01, UI-03, UI-04)
+- [ ] 02-05-PLAN.md — BootSplash + LanguageSwitcher + LanguageConfirmDialog + SettingsModal Interface Language section (UI-02, UI-03)
 **UI hint**: yes
 
 ### Phase 3: RTL Layout Conversion
@@ -101,7 +106,7 @@ Record a meeting, get an accurate transcript and a useful summary — in your ow
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Preferences Foundation | 0/1 | Planned | — |
-| 2. i18n Framework & Locale Bootstrap | 0/0 | Not started | — |
+| 2. i18n Framework & Locale Bootstrap | 0/5 | Planned | — |
 | 3. RTL Layout Conversion | 0/0 | Not started | — |
 | 4. Arabic Transcription Policy | 0/0 | Not started | — |
 | 5. Templates & Prompts (Bilingual Content) | 0/0 | Not started | — |
