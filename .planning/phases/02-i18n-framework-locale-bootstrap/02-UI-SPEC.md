@@ -5,6 +5,7 @@ status: draft
 shadcn_initialized: true
 preset: "new-york / neutral / cssVariables / lucide"
 created: 2026-04-08
+revised: 2026-04-08
 milestone: v1.0 — Arabic Bilingual Support
 requirements: [UI-01, UI-02, UI-03, UI-04]
 upstream_sources:
@@ -81,21 +82,42 @@ Inherit Tailwind's default 4px scale. Phase 2 surfaces (BootSplash, Settings lan
 
 ## Typography
 
-Existing token set from `frontend/tailwind.config.ts:20-27` is already the right shape. Phase 2 re-uses these tokens unchanged and adds a single font-family switch.
+Phase 2's declared type contract is scoped to exactly **4 font sizes** and **2 font weights**, chosen from the existing `frontend/tailwind.config.ts:20-27` token set. Phase 2 ships only two surfaces (BootSplash and the Settings language section) — this subset covers both without any token additions.
 
-| Role | Size | Weight | Line Height | Token |
-|------|------|--------|-------------|-------|
-| Body (default) | 16px | 400 | 1.6 | `text-body` |
-| Label / UI small | 14px | 400 | 1.5 | `text-small` |
-| Heading (h2 / section) | 18px | 500 | 1.4 | `text-h2` |
-| Heading (h1 / dialog) | 24px | 600 | 1.3 | `text-h1` |
-| Display (BootSplash app name) | 32px | 700 | 1.2 | `text-display` |
+> **Phase 2 contract scopes to 4 sizes / 2 weights. The existing 18px `text-h2` token and 700 `font-bold` weight are out-of-phase tokens not used by Phase 2 surfaces.** They remain in `tailwind.config.ts` unchanged (no token edits this phase); Phase 2 simply does not consume them. Phase 3+ may re-enter them under their own contracts.
 
-**Weight inventory (declare only 2 per checker rule):**
-- **Regular** (400) — body, label, caption
-- **Semibold** (600) — headings (h1/h2), Display 700 is the ONE allowed exception for the BootSplash wordmark and is documented here intentionally; no other surface may introduce a third weight in this phase.
+### Declared size contract (exactly 4)
 
-**Line-height policy:** body 1.5–1.6, headings 1.2–1.4. **Arabic needs extra headroom** — Tajawal ascenders + diacritics push ~1.1–1.2x English height. All new text containers must use `leading-relaxed` (1.625) or the declared token line-height; **never** lower than 1.4 for body when `dir="rtl"`.
+| Role | Size | Weight | Line Height | Token | Used by (Phase 2) |
+|------|------|--------|-------------|-------|-------------------|
+| Display (BootSplash wordmark) | 32px | 600 | 1.2 | `text-display` | BootSplash "Meetily" wordmark |
+| Heading (h1 / section + dialog) | 24px | 600 | 1.3 | `text-h1` | Settings "Language" section heading; `LanguageConfirmDialog` title |
+| Body (default) | 16px | 400 | 1.6 | `text-body` | Dialog body copy; option Label text; switcher CTA button label |
+| Label / UI small | 14px | 400 | 1.5 | `text-small` | Settings description; BootSplash tagline; muted secondary copy |
+
+**Phase 2 size inventory (exactly 4):** `14 / 16 / 24 / 32`.
+
+### Declared weight contract (exactly 2)
+
+- **Regular 400** — body, labels, descriptions, captions, BootSplash tagline
+- **Semibold 600** — all headings (h1), dialog titles, button labels, and the **BootSplash wordmark** (`text-display` is rendered at `font-semibold`, overriding the token's default 700 for this phase's usage)
+
+**Phase 2 weight inventory (exactly 2):** `400 / 600`.
+
+### Out-of-phase tokens (exist in tailwind.config.ts, NOT used by Phase 2)
+
+| Token / value | Why not used in Phase 2 |
+|---------------|-------------------------|
+| `text-h2` (18px / 500) | Phase 2's only sub-section need is the Settings "Language" heading, which consolidates to `text-h1` 24px and differentiates via weight (600) and vertical spacing instead of introducing a second heading size. |
+| `font-bold` 700 | `text-display` token defaults to 700, but Phase 2 explicitly renders the BootSplash wordmark at `font-semibold` (600). The wordmark remains the visual focal point through its 32px display size, not its weight. |
+| `text-caption` (12px / 400) | Not used by any Phase 2 surface; smallest size in Phase 2 is `text-small` (14px). |
+| `font-medium` 500 | Not used by any Phase 2 surface; all mid-weight emphasis collapses to semibold (600). |
+
+**Important:** Do NOT modify `tailwind.config.ts` in Phase 2. The token file legitimately contains 6 sizes and multiple weights for the whole app — this is fine. Phase 2's design contract narrows *which tokens are consumed* for the two surfaces this phase ships, nothing more.
+
+### Line-height policy
+
+Body 1.5–1.6, headings 1.2–1.3. **Arabic needs extra headroom** — Tajawal ascenders + diacritics push ~1.1–1.2x English height. All new text containers must use the declared token line-height; **never** lower than 1.4 for body when `dir="rtl"`.
 
 ### Font Loading (NEW — authoritative contract)
 
@@ -107,18 +129,20 @@ import { Source_Sans_3, Tajawal } from 'next/font/google'
 
 const sourceSans3 = Source_Sans_3({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '600'],       // Phase 2 contract = 2 weights only
   variable: '--font-source-sans-3',
   display: 'swap',
 })
 
 const tajawal = Tajawal({
-  subsets: ['arabic'],            // arabic subset — do NOT load latin; Source Sans 3 covers EN
-  weight: ['400', '500', '700'],  // 400 body, 500 h2, 700 display/heading — mirrors Source Sans 3 ladder
+  subsets: ['arabic'],          // arabic subset — do NOT load latin; Source Sans 3 covers EN
+  weight: ['400', '500'],       // Tajawal's 600 equivalent ships as 500 in Google Fonts; treat as semibold
   variable: '--font-tajawal',
   display: 'swap',
 })
 ```
+
+> **Note on Tajawal weights:** Google Fonts' Tajawal family does not publish a 600 weight — its semibold equivalent is `500`. The CSS `font-weight: 600` declaration on headings will map to Tajawal 500 via the browser's nearest-match, which renders as the family's semibold. This does not violate the 2-weight contract (the contract is expressed in CSS weight values 400/600, not font-file weights).
 
 ### Applied font family (driven by `dir` attribute, not a className)
 
@@ -285,11 +309,13 @@ The BootSplash is the phase's most visible new surface. Its job is to look inten
 | Layout | Full-bleed centered flex column, `min-h-screen`, `flex items-center justify-center` |
 | Background | `bg-background` (dominant) |
 | Direction | Fixed LTR during splash (we don't know the locale yet). Text inside uses `text-center`, which is RTL-safe. |
-| Content (vertical order) | 1. App wordmark "Meetily" (`text-display`, `font-semibold` or `font-bold 700` per exception above) <br> 2. `gap-4` (16px) <br> 3. Spinner (Lucide `Loader2` with `animate-spin`, `w-6 h-6`, `text-primary`) <br> 4. `gap-2` (8px) <br> 5. Tagline `boot.loading` (`text-small text-muted-foreground`) |
+| Content (vertical order) | 1. App wordmark "Meetily" (`text-display` size, explicitly `font-semibold` — 600 weight, overriding `text-display`'s token default of 700 to honor the Phase 2 2-weight contract) <br> 2. `gap-4` (16px) <br> 3. Spinner (Lucide `Loader2` with `animate-spin`, `w-6 h-6`, `text-primary`) <br> 4. `gap-2` (8px) <br> 5. Tagline `boot.loading` (`text-small text-muted-foreground`, `font-normal` 400) |
 | Copy language | Defaults to English during bootstrap (Arabic catalogue isn't loaded yet). Once preferences resolve, if this re-renders the Arabic tagline will be used — but typical case is the splash dismounts before the re-render. The contract accepts that the tagline may briefly read English even on an Arabic first-run — this is acceptable because the splash is non-chrome and the first "real" UI paint is Arabic. |
 | Minimum visible time | 150ms artificial minimum to prevent flash-on-fast-machines; implemented via `Promise.all([prefsPromise, new Promise(r => setTimeout(r, 150))])`. |
 | Maximum acceptable time | 2000ms before the error toast triggers and the splash falls back to `en`. |
 | Accessibility | `role="status"` on the container, `aria-live="polite"` on the tagline, visually-hidden "Loading Meetily" on the spinner. |
+
+**Wordmark weight note:** The `text-display` Tailwind token in `tailwind.config.ts:21` declares `fontWeight: '700'` as its default. Phase 2 intentionally renders the wordmark with an **explicit** `font-semibold` class (600) to stay within the 2-weight contract. The visual focal role of the wordmark is carried by its 32px display **size**, not by a bold weight. Do NOT modify the token itself — just apply `font-semibold` on the element.
 
 **Explicit non-goals:** no progress bar, no percentage, no multi-step list. This is a splash, not an installer.
 
@@ -301,14 +327,16 @@ Lives inside the existing `SettingsModal.tsx` (spec cross-reference: `app/_compo
 
 | Attribute | Value |
 |-----------|-------|
-| Section heading | `settings.language.sectionTitle` as an h2 (`text-h2`, `font-medium`) |
-| Description | `settings.language.description` as body copy (`text-small text-muted-foreground`), `mt-1` |
+| Section heading | `settings.language.sectionTitle` as an h2 element, styled with `text-h1` (24px / 600) — Phase 2 consolidates all headings to the h1 size and differentiates sub-sections via vertical spacing (`mt-6` / `mb-2`) and weight (600) rather than a second size. |
+| Description | `settings.language.description` as body copy (`text-small text-muted-foreground font-normal`), `mt-1` |
 | Option list | shadcn `RadioGroup` with 2 items; `gap-3` between rows |
 | Option row | `flex items-center gap-3 rounded-md border p-4` — logical properties only |
-| Option content order (JSX left-to-right) | `<RadioGroupItem>` → `<Label>` with language name → optional locale tag (`en` / `ar`). Because we use logical alignment and the dir switch happens at `<html>`, the native name sits at the **start** edge of the row in both locales. |
+| Option content order (JSX left-to-right) | `<RadioGroupItem>` → `<Label>` with language name (`text-body font-normal`) → optional locale tag (`text-small font-normal`). Because we use logical alignment and the dir switch happens at `<html>`, the native name sits at the **start** edge of the row in both locales. |
 | Selected state | Accent ring (`ring-2 ring-primary`), `border-primary`, checked radio dot uses accent |
 | Unselected state | `border-input` (default shadcn), hover `bg-muted/50` |
-| Action button | shadcn `Button` variant `default` (primary), `text-small font-medium`, `h-11` (touch target), label = `settings.language.switchCta` with `{lang}` = the *other* language's native name. Disabled when the current locale matches the selection. |
+| Action button | shadcn `Button` variant `default` (primary), `text-body font-semibold`, `h-11` (touch target), label = `settings.language.switchCta` with `{lang}` = the *other* language's native name. Disabled when the current locale matches the selection. |
+
+**Section heading rationale:** Earlier drafts used `text-h2` (18px / 500) for the section heading. Phase 2's 4-size / 2-weight contract eliminates both the 18px size and the 500 weight, so the section heading is promoted to `text-h1` (24px / 600). Visual differentiation from the dialog title (also `text-h1`) is handled by context (section vs. dialog) and vertical spacing, not a separate size.
 
 **RTL correctness verification checklist for the Language section:**
 1. Does every class in `LanguageSwitcher.tsx` use logical properties? (`ps-*`, `pe-*`, `ms-*`, `me-*`, `text-start`, `border-s-*`…)
@@ -316,8 +344,9 @@ Lives inside the existing `SettingsModal.tsx` (spec cross-reference: `app/_compo
 3. Is any `flexDirection` or `flex-row-reverse` used? **If yes, remove** — rely on the `dir` attribute.
 4. Is there any hard-coded "English" or "Arabic" string outside `messages/*.json`? **If yes, move to the catalogue.**
 5. Does the confirm button become disabled when a recording is active? (`useRecordingState`)
+6. Does any element use `text-h2`, `font-medium`, or `font-bold`? **If yes, switch to the 4-size / 2-weight contract** (14/16/24/32 sizes; 400/600 weights).
 
-The checker (`gsd-ui-checker`) will grep the new files for physical-direction classes. Zero tolerance.
+The checker (`gsd-ui-checker`) will grep the new files for physical-direction classes and for out-of-phase typography tokens. Zero tolerance.
 
 ---
 
@@ -416,6 +445,7 @@ These items belong to downstream phases. Do **not** bundle them into Phase 2 pla
 | Hot-swap locale switching | Permanently out of scope (spec §9, §12.4) |
 | Per-component language switching | Permanently out of scope (spec §9) |
 | `navigator.language` → seed `summary_language` / `transcription_language` | Out of scope — only `ui_locale` is seeded from `navigator.language`. The other two stay at their Phase 1 defaults. |
+| Editing `tailwind.config.ts` typography tokens | Phase 2 narrows *which* tokens are consumed; it does not edit the token file. Any token removal is a future-phase decision. |
 
 ---
 
@@ -424,7 +454,7 @@ These items belong to downstream phases. Do **not** bundle them into Phase 2 pla
 - [ ] Dimension 1 Copywriting: PASS
 - [ ] Dimension 2 Visuals: PASS
 - [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
+- [ ] Dimension 4 Typography: PASS (revised 2026-04-08 — scoped to 4 sizes / 2 weights)
 - [ ] Dimension 5 Spacing: PASS
 - [ ] Dimension 6 Registry Safety: PASS
 
@@ -443,4 +473,13 @@ These items belong to downstream phases. Do **not** bundle them into Phase 2 pla
 
 ---
 
-*UI-SPEC drafted: 2026-04-08 by gsd-ui-researcher for Phase 2. Upstream: spec v2 (2026-04-07), Phase 1 SUMMARY, PROJECT.md Key Decisions, existing shadcn + Tailwind config.*
+## Revision History
+
+| Date | Change | Reason |
+|------|--------|--------|
+| 2026-04-08 | Initial draft | Phase 2 UI contract, committed `78f0cbf` |
+| 2026-04-08 | Typography section revised to 4 sizes / 2 weights; BootSplash wordmark weight changed from 700 to 600; Settings section heading consolidated from `text-h2` 18px to `text-h1` 24px | Checker blocking issues: Dim 4 Typography had 5 sizes (max 4) and 3 weights (max 2). `tailwind.config.ts` untouched — contract narrows consumed tokens only. |
+
+---
+
+*UI-SPEC drafted: 2026-04-08 by gsd-ui-researcher for Phase 2. Revised 2026-04-08 for checker typography blocks. Upstream: spec v2 (2026-04-07), Phase 1 SUMMARY, PROJECT.md Key Decisions, existing shadcn + Tailwind config.*
