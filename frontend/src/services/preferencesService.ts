@@ -16,6 +16,7 @@ export interface UserPreferences {
   uiLocale: UiLocale;
   summaryLanguage: SummaryLanguage;
   transcriptionLanguage: string; // 'auto' | 'en' | 'ar' | ISO code
+  bootstrapped: boolean;
 }
 
 /**
