@@ -4,9 +4,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
-import { Eye, EyeOff, Lock, Unlock } from 'lucide-react';
+import { Eye, EyeOff, Lock, Unlock, Info } from 'lucide-react';
 import { ModelManager } from './WhisperModelManager';
 import { ParakeetModelManager } from './ParakeetModelManager';
+import { useLocale } from '@/providers/I18nProvider';
+import { useTranslations } from 'next-intl';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 
 export interface TranscriptModelProps {
@@ -22,6 +25,10 @@ export interface TranscriptSettingsProps {
 }
 
 export function TranscriptSettings({ transcriptModelConfig, setTranscriptModelConfig, onModelSelect }: TranscriptSettingsProps) {
+    const locale = useLocale();
+    const isArabic = locale === 'ar';
+    const t = useTranslations('transcriptSettings');
+
     const [apiKey, setApiKey] = useState<string | null>(transcriptModelConfig.apiKey || null);
     const [showApiKey, setShowApiKey] = useState<boolean>(false);
     const [isApiKeyLocked, setIsApiKeyLocked] = useState<boolean>(true);
@@ -58,6 +65,20 @@ export function TranscriptSettings({ transcriptModelConfig, setTranscriptModelCo
         groq: ['llama-3.3-70b-versatile'],
         openai: ['gpt-4o'],
     };
+
+    // D-01: Remove Parakeet from rendered options when uiLocale === 'ar'
+    const filteredModelOptions = isArabic
+        ? Object.fromEntries(Object.entries(modelOptions).filter(([key]) => key !== 'parakeet'))
+        : modelOptions;
+
+    // Auto-correct provider if Parakeet is selected while Arabic locale is active
+    useEffect(() => {
+        if (isArabic && uiProvider === 'parakeet') {
+            setUiProvider('localWhisper');
+            setTranscriptModelConfig({ ...transcriptModelConfig, provider: 'localWhisper', model: 'large-v3' });
+        }
+    }, [isArabic, uiProvider]);
+
     const requiresApiKey = transcriptModelConfig.provider === 'deepgram' || transcriptModelConfig.provider === 'elevenLabs' || transcriptModelConfig.provider === 'openai' || transcriptModelConfig.provider === 'groq';
 
     const handleInputClick = () => {
@@ -102,6 +123,14 @@ export function TranscriptSettings({ transcriptModelConfig, setTranscriptModelCo
                     <h3 className="text-lg font-semibold text-gray-900">Transcript Settings</h3>
                 </div> */}
                 <div className="space-y-4 pb-6">
+                    {isArabic && (
+                        <Alert className="mb-6 border-blue-600/20 bg-blue-600/10">
+                            <Info className="h-4 w-4 text-blue-600" />
+                            <AlertDescription className="text-foreground">
+                                {t('arabicBanner')}
+                            </AlertDescription>
+                        </Alert>
+                    )}
                     <div>
                         <Label className="block text-sm font-medium text-gray-700 mb-1">
                             Transcript Model
@@ -121,7 +150,9 @@ export function TranscriptSettings({ transcriptModelConfig, setTranscriptModelCo
                                     <SelectValue placeholder="Select provider" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="parakeet">⚡ Parakeet (Recommended - Real-time / Accurate)</SelectItem>
+                                    {!isArabic && (
+                                        <SelectItem value="parakeet">⚡ Parakeet (Recommended - Real-time / Accurate)</SelectItem>
+                                    )}
                                     <SelectItem value="localWhisper">🏠 Local Whisper (High Accuracy)</SelectItem>
                                     {/* <SelectItem value="deepgram">☁️ Deepgram (Backup)</SelectItem>
                                     <SelectItem value="elevenLabs">☁️ ElevenLabs</SelectItem>
@@ -142,7 +173,7 @@ export function TranscriptSettings({ transcriptModelConfig, setTranscriptModelCo
                                         <SelectValue placeholder="Select model" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {modelOptions[uiProvider].map((model) => (
+                                        {(filteredModelOptions[uiProvider as keyof typeof filteredModelOptions] as string[] || []).map((model: string) => (
                                             <SelectItem key={model} value={model}>{model}</SelectItem>
                                         ))}
                                     </SelectContent>
@@ -162,7 +193,7 @@ export function TranscriptSettings({ transcriptModelConfig, setTranscriptModelCo
                         </div>
                     )}
 
-                    {uiProvider === 'parakeet' && (
+                    {!isArabic && uiProvider === 'parakeet' && (
                         <div className="mt-6">
                             <ParakeetModelManager
                                 selectedModel={transcriptModelConfig.provider === 'parakeet' ? transcriptModelConfig.model : undefined}
