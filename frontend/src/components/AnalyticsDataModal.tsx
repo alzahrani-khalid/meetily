@@ -49,7 +49,7 @@ export default function AnalyticsDataModal({ isOpen, onClose, onConfirmDisable }
             {/* Model Preferences */}
             <div className="border border-gray-200 rounded-lg p-4">
               <h4 className="font-semibold text-gray-900 mb-2">1. Model Preferences</h4>
-              <ul className="text-sm text-gray-700 space-y-1 ml-4">
+              <ul className="text-sm text-gray-700 space-y-1 ms-4">
                 <li>• Transcription model (e.g., "Whisper large-v3", "Parakeet")</li>
                 <li>• Summary model (e.g., "Llama 3.2", "Claude Sonnet")</li>
                 <li>• Model provider (e.g., "Local", "Ollama", "OpenRouter")</li>
@@ -60,7 +60,7 @@ export default function AnalyticsDataModal({ isOpen, onClose, onConfirmDisable }
             {/* Meeting Metrics */}
             <div className="border border-gray-200 rounded-lg p-4">
               <h4 className="font-semibold text-gray-900 mb-2">2. Anonymous Meeting Metrics</h4>
-              <ul className="text-sm text-gray-700 space-y-1 ml-4">
+              <ul className="text-sm text-gray-700 space-y-1 ms-4">
                 <li>• Recording duration (e.g., "125 seconds")</li>
                 <li>• Pause duration (e.g., "5 seconds")</li>
                 <li>• Number of transcript segments</li>
@@ -72,7 +72,7 @@ export default function AnalyticsDataModal({ isOpen, onClose, onConfirmDisable }
             {/* Device Types */}
             <div className="border border-gray-200 rounded-lg p-4">
               <h4 className="font-semibold text-gray-900 mb-2">3. Device Types (Not Names)</h4>
-              <ul className="text-sm text-gray-700 space-y-1 ml-4">
+              <ul className="text-sm text-gray-700 space-y-1 ms-4">
                 <li>• Microphone type: "Bluetooth" or "Wired" or "Unknown"</li>
                 <li>• System audio type: "Bluetooth" or "Wired" or "Unknown"</li>
               </ul>
@@ -82,7 +82,7 @@ export default function AnalyticsDataModal({ isOpen, onClose, onConfirmDisable }
             {/* Usage Patterns */}
             <div className="border border-gray-200 rounded-lg p-4">
               <h4 className="font-semibold text-gray-900 mb-2">4. App Usage Patterns</h4>
-              <ul className="text-sm text-gray-700 space-y-1 ml-4">
+              <ul className="text-sm text-gray-700 space-y-1 ms-4">
                 <li>• App started/stopped events</li>
                 <li>• Session duration</li>
                 <li>• Feature usage (e.g., "settings changed")</li>
@@ -94,7 +94,7 @@ export default function AnalyticsDataModal({ isOpen, onClose, onConfirmDisable }
             {/* Platform Info */}
             <div className="border border-gray-200 rounded-lg p-4">
               <h4 className="font-semibold text-gray-900 mb-2">5. Platform Information</h4>
-              <ul className="text-sm text-gray-700 space-y-1 ml-4">
+              <ul className="text-sm text-gray-700 space-y-1 ms-4">
                 <li>• Operating system (e.g., "macOS", "Windows")</li>
                 <li>• App version (automatically included in all events)</li>
                 <li>• Architecture (e.g., "x86_64", "aarch64")</li>
@@ -106,7 +106,7 @@ export default function AnalyticsDataModal({ isOpen, onClose, onConfirmDisable }
           {/* What We DON'T Collect */}
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <h4 className="font-semibold text-red-900 mb-2">What We DON'T Collect:</h4>
-            <ul className="text-sm text-red-800 space-y-1 ml-4">
+            <ul className="text-sm text-red-800 space-y-1 ms-4">
               <li>• ❌ Meeting names or titles</li>
               <li>• ❌ Meeting transcripts or content</li>
               <li>• ❌ Audio recordings</li>

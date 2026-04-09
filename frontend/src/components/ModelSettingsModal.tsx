@@ -808,7 +808,7 @@ export function ModelSettingsModal({
       <div className="space-y-4">
         <div>
           <Label>Summarization Model</Label>
-          <div className="flex space-x-2 mt-1">
+          <div className="flex space-x-2 rtl:space-x-reverse mt-1">
             <Select
               value={modelConfig.provider}
               onValueChange={(value) => {
@@ -894,7 +894,7 @@ export function ModelSettingsModal({
                     <span className="truncate">
                       {modelConfig.model || "Select model..."}
                     </span>
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[250px] p-0" align="start">
@@ -924,7 +924,7 @@ export function ModelSettingsModal({
                               >
                                 <Check
                                   className={cn(
-                                    "mr-2 h-4 w-4",
+                                    "me-2 h-4 w-4",
                                     modelConfig.model === model ? "opacity-100" : "opacity-0"
                                   )}
                                 />
@@ -1000,7 +1000,7 @@ export function ModelSettingsModal({
               </div>
 
               {isCustomOpenAIAdvancedOpen && (
-                <div className="space-y-3 pl-2 border-l-2 border-muted mt-2">
+                <div className="space-y-3 ps-2 border-s-2 border-muted mt-2">
                   <div>
                     <Label htmlFor="custom-max-tokens">Max Tokens</Label>
                     <Input
@@ -1055,12 +1055,12 @@ export function ModelSettingsModal({
             >
               {isTestingConnection ? (
                 <>
-                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                  <RefreshCw className="me-2 h-4 w-4 animate-spin" />
                   Testing Connection...
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  <CheckCircle2 className="me-2 h-4 w-4" />
                   Test Connection
                 </>
               )}
@@ -1078,7 +1078,7 @@ export function ModelSettingsModal({
                 onChange={(e) => setApiKey(e.target.value)}
                 disabled={isApiKeyLocked}
                 placeholder="Enter your API key"
-                className="pr-24"
+                className="pe-24"
               />
               {isApiKeyLocked && apiKey?.trim() && (
                 <div
@@ -1086,7 +1086,7 @@ export function ModelSettingsModal({
                   className="absolute inset-0 flex items-center justify-center bg-muted/50 rounded-md cursor-not-allowed"
                 />
               )}
-              <div className="absolute inset-y-0 right-0 pr-1 flex items-center space-x-1">
+              <div className="absolute inset-y-0 end-0 pe-1 flex items-center space-x-1 rtl:space-x-reverse">
                 {apiKey?.trim() && (
                   <Button
                     type="button"
@@ -1146,15 +1146,15 @@ export function ModelSettingsModal({
                       }}
                       placeholder="http://localhost:11434"
                       className={cn(
-                        "pr-10",
+                        "pe-10",
                         endpointValidationState === 'invalid' && "border-red-500"
                       )}
                     />
                     {endpointValidationState === 'valid' && (
-                      <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                      <CheckCircle2 className="absolute end-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
                     )}
                     {endpointValidationState === 'invalid' && (
-                      <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-500" />
+                      <XCircle className="absolute end-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-500" />
                     )}
                   </div>
                   <Button
@@ -1167,12 +1167,12 @@ export function ModelSettingsModal({
                   >
                     {isLoadingOllama ? (
                       <>
-                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                        <RefreshCw className="me-2 h-4 w-4 animate-spin" />
                         Fetching...
                       </>
                     ) : (
                       <>
-                        <RefreshCw className="mr-2 h-4 w-4" />
+                        <RefreshCw className="me-2 h-4 w-4" />
                         Fetch Models
                       </>
                     )}
@@ -1234,7 +1234,7 @@ export function ModelSettingsModal({
                       onClick={() => invoke('open_external_url', { url: 'https://ollama.com/download' })}
                       className="w-full bg-blue-600 hover:bg-blue-700"
                     >
-                      <ExternalLink className="mr-2 h-4 w-4" />
+                      <ExternalLink className="me-2 h-4 w-4" />
                       Download Ollama
                     </Button>
                     <div className="text-sm text-muted-foreground text-center">
@@ -1262,12 +1262,12 @@ export function ModelSettingsModal({
                         >
                           {isDownloading('gemma3:1b') ? (
                             <>
-                              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                              <RefreshCw className="me-2 h-4 w-4 animate-spin" />
                               Downloading gemma3:1b...
                             </>
                           ) : (
                             <>
-                              <Download className="mr-2 h-4 w-4" />
+                              <Download className="me-2 h-4 w-4" />
                               Download gemma3:1b (Recommended, ~800MB)
                             </>
                           )}
@@ -1296,7 +1296,7 @@ export function ModelSettingsModal({
                 )}
               </div>
             ) : !ollamaEndpointChanged && (
-              <ScrollArea className="max-h-[calc(100vh-450px)] overflow-y-auto pr-4">
+              <ScrollArea className="max-h-[calc(100vh-450px)] overflow-y-auto pe-4">
                 {filteredModels.length === 0 ? (
                   <Alert>
                     <AlertDescription>

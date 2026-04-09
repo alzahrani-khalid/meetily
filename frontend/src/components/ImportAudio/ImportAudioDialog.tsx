@@ -311,12 +311,12 @@ export function ImportAudioDialog({
                   <Button onClick={handleSelectFile} disabled={status === 'validating'}>
                     {status === 'validating' ? (
                       <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="h-4 w-4 me-2 animate-spin" />
                         Validating...
                       </>
                     ) : (
                       <>
-                        <Upload className="h-4 w-4 mr-2" />
+                        <Upload className="h-4 w-4 me-2" />
                         Select Audio File
                       </>
                     )}
@@ -447,14 +447,14 @@ export function ImportAudioDialog({
                 className="bg-blue-600 hover:bg-blue-700"
                 disabled={!fileInfo}
               >
-                <Upload className="h-4 w-4 mr-2" />
+                <Upload className="h-4 w-4 me-2" />
                 Import
               </Button>
             </>
           )}
           {isProcessing && (
             <Button variant="outline" onClick={handleCancel}>
-              <X className="h-4 w-4 mr-2" />
+              <X className="h-4 w-4 me-2" />
               Cancel
             </Button>
           )}

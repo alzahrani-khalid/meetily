@@ -135,7 +135,7 @@ export function TranscriptRecovery({
                     key={meeting.meetingId}
                     onClick={() => handleMeetingSelect(meeting.meetingId)}
                     className={cn(
-                      'w-full text-left p-3 rounded-lg border transition-colors',
+                      'w-full text-start p-3 rounded-lg border transition-colors',
                       selectedMeetingId === meeting.meetingId
                         ? 'bg-primary/10 border-primary'
                         : 'hover:bg-muted border-transparent'
@@ -279,12 +279,12 @@ export function TranscriptRecovery({
           >
             {isDeleting ? (
               <>
-                <XCircle className="w-4 h-4 mr-2 animate-spin" />
+                <XCircle className="w-4 h-4 me-2 animate-spin" />
                 Deleting...
               </>
             ) : (
               <>
-                <Trash2 className="w-4 h-4 mr-2" />
+                <Trash2 className="w-4 h-4 me-2" />
                 Delete
               </>
             )}
@@ -295,12 +295,12 @@ export function TranscriptRecovery({
           >
             {isRecovering ? (
               <>
-                <CheckCircle2 className="w-4 h-4 mr-2 animate-spin" />
+                <CheckCircle2 className="w-4 h-4 me-2 animate-spin" />
                 Recovering...
               </>
             ) : (
               <>
-                <CheckCircle2 className="w-4 h-4 mr-2" />
+                <CheckCircle2 className="w-4 h-4 me-2" />
                 Recover
               </>
             )}

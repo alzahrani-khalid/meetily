@@ -357,7 +357,7 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
                   </div>
                 </div>
 
-                <div className="ml-4 flex items-center gap-2">
+                <div className="ms-4 flex items-center gap-2">
                   {/* Not Downloaded - Show Download button */}
                   {isNotDownloaded && !modelIsDownloading && (
                     <Button
@@ -369,7 +369,7 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
                         downloadModel(model.name);
                       }}
                     >
-                      <Download className="mr-2 h-4 w-4" />
+                      <Download className="me-2 h-4 w-4" />
                       Download
                     </Button>
                   )}
@@ -400,7 +400,7 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
                         downloadModel(model.name);
                       }}
                     >
-                      <RefreshCw className="mr-2 h-4 w-4" />
+                      <RefreshCw className="me-2 h-4 w-4" />
                       Retry
                     </Button>
                   )}
@@ -416,7 +416,7 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
                           downloadModel(model.name);
                         }}
                       >
-                        <RefreshCw className="mr-2 h-4 w-4" />
+                        <RefreshCw className="me-2 h-4 w-4" />
                         Retry
                       </Button>
                       <Button
@@ -427,7 +427,7 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
                           deleteModel(model.name);
                         }}
                       >
-                        <Trash2 className="mr-2 h-4 w-4" />
+                        <Trash2 className="me-2 h-4 w-4" />
                         Delete
                       </Button>
                     </>
@@ -463,7 +463,7 @@ export function BuiltInModelManager({ selectedModel, onModelSelect }: BuiltInMod
                       <>
                         {progressInfo.downloadedMb.toFixed(1)} MB / {progressInfo.totalMb.toFixed(1)} MB
                         {progressInfo.speedMbps > 0 && (
-                          <span className="ml-2 text-gray-500">
+                          <span className="ms-2 text-gray-500">
                             ({progressInfo.speedMbps.toFixed(1)} MB/s)
                           </span>
                         )}

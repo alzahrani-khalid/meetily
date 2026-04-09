@@ -608,7 +608,7 @@ export const AISummary = ({ summary, status, error, onSummaryChange, onRegenerat
   const renderErrorState = () => (
     <div className="w-full p-4 bg-red-50 border border-red-200 rounded-lg">
       <div className="flex items-center mb-2">
-        <ExclamationTriangleIcon className="h-5 w-5 text-red-500 mr-2" />
+        <ExclamationTriangleIcon className="h-5 w-5 text-red-500 me-2" />
         <h3 className="text-red-700 font-medium">Error Generating Summary</h3>
       </div>
       <p className="text-red-600 text-sm">{error}</p>
@@ -618,7 +618,7 @@ export const AISummary = ({ summary, status, error, onSummaryChange, onRegenerat
 
   const renderLoadingState = () => (
     <div className="w-full p-4 bg-blue-50 border border-blue-200 rounded-lg">
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-3 rtl:space-x-reverse">
         <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent"></div>
         <div>
           <h3 className="text-blue-700 font-medium">
@@ -681,14 +681,14 @@ export const AISummary = ({ summary, status, error, onSummaryChange, onRegenerat
           onClick={e => e.stopPropagation()}
         >
           <button
-            className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center space-x-2"
+            className="w-full px-4 py-2 text-start hover:bg-gray-100 flex items-center space-x-2 rtl:space-x-reverse"
             onClick={handleCopyBlocks}
           >
             <span className="text-gray-600">📋</span>
             <span>Copy {selectedBlocks.length > 1 ? `${selectedBlocks.length} blocks` : 'block'}</span>
           </button>
           <button
-            className="w-full px-4 py-2 text-left hover:bg-gray-100 text-red-600 flex items-center space-x-2"
+            className="w-full px-4 py-2 text-start hover:bg-gray-100 text-red-600 flex items-center space-x-2 rtl:space-x-reverse"
             onClick={handleDeleteBlocks}
           >
             <span>🗑️</span>
@@ -698,13 +698,13 @@ export const AISummary = ({ summary, status, error, onSummaryChange, onRegenerat
       )}
 
       {/* <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 rtl:space-x-reverse">
           <span className="text-2xl">✨</span>
           <h2 className="text-2xl font-semibold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
             AI Enhanced Summary
           </h2>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 rtl:space-x-reverse">
           <button
             onClick={handleUndo}
             disabled={currentHistoryIndex === 0}
@@ -772,20 +772,20 @@ export const AISummary = ({ summary, status, error, onSummaryChange, onRegenerat
               const markdown = convertToMarkdown();
               navigator.clipboard.writeText(markdown);
             }}
-            className="px-2 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md flex items-center space-x-1"
+            className="px-2 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md flex items-center space-x-1 rtl:space-x-reverse"
           >
             <span>📋</span>
             <span>Copy</span>
           </button>
           <button
             onClick={onRegenerateSummary}
-            className="px-2 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md flex items-center space-x-1"
+            className="px-2 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md flex items-center space-x-1 rtl:space-x-reverse"
             title="Regenerate Summary"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            <span className="ml-1">Regenerate</span>
+            <span className="ms-1">Regenerate</span>
           </button>
         </div>
       </div> */}
