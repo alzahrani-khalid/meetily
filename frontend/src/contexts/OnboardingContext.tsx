@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import type { PermissionStatus, OnboardingPermissions } from '@/types/onboarding';
+import { useLocale } from '@/providers/I18nProvider';
 
 const PARAKEET_MODEL = 'parakeet-tdt-0.6b-v3-int8';
 
@@ -65,6 +66,8 @@ interface OnboardingContextType {
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
 
 export function OnboardingProvider({ children }: { children: React.ReactNode }) {
+  const locale = useLocale();
+  const isArabic = locale === 'ar';
   const [currentStep, setCurrentStep] = useState(1);
   const [completed, setCompleted] = useState(false);
   const [parakeetDownloaded, setParakeetDownloaded] = useState(false);
@@ -326,14 +329,27 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     let parakeetDownloaded = false;
     let summaryModelDownloaded = false;
 
-    // Verify Parakeet model exists on disk
-    try {
-      await invoke('parakeet_init');
-      parakeetDownloaded = await invoke<boolean>('parakeet_has_available_models');
-      console.log('[OnboardingContext] Parakeet verified on disk:', parakeetDownloaded);
-    } catch (error) {
-      console.warn('[OnboardingContext] Failed to verify Parakeet:', error);
-      parakeetDownloaded = false;
+    // Verify transcription model exists on disk
+    if (isArabic) {
+      // For Arabic locale, check Whisper large-v3 instead of Parakeet
+      try {
+        const whisperModels = await invoke<any[]>('whisper_get_available_models');
+        const largeV3 = whisperModels.find((m: any) => m.name === 'large-v3');
+        parakeetDownloaded = largeV3?.status === 'Available';
+        console.log('[OnboardingContext] Whisper large-v3 verified on disk (Arabic):', parakeetDownloaded);
+      } catch (error) {
+        console.warn('[OnboardingContext] Failed to verify Whisper:', error);
+        parakeetDownloaded = false;
+      }
+    } else {
+      try {
+        await invoke('parakeet_init');
+        parakeetDownloaded = await invoke<boolean>('parakeet_has_available_models');
+        console.log('[OnboardingContext] Parakeet verified on disk:', parakeetDownloaded);
+      } catch (error) {
+        console.warn('[OnboardingContext] Failed to verify Parakeet:', error);
+        parakeetDownloaded = false;
+      }
     }
 
     // Verify Summary model exists on disk - check if ANY model is available
@@ -427,8 +443,15 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     setIsBackgroundDownloading(true);
 
     try {
-      // Start Parakeet download first (speech recognition - always required)
-      if (!parakeetDownloaded) {
+      // For Arabic locale, download Whisper large-v3 instead of Parakeet
+      if (isArabic) {
+        if (!parakeetDownloaded) {
+          console.log('[OnboardingContext] Arabic locale: Starting Whisper large-v3 download');
+          invoke('whisper_download_model', { modelName: 'large-v3' })
+            .catch(err => console.error('[OnboardingContext] Whisper download failed:', err));
+        }
+      } else if (!parakeetDownloaded) {
+        // Start Parakeet download first (speech recognition - always required for English)
         console.log('[OnboardingContext] Starting Parakeet download');
         invoke('parakeet_download_model', { modelName: PARAKEET_MODEL })
           .catch(err => console.error('[OnboardingContext] Parakeet download failed:', err));
@@ -452,16 +475,22 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
   // Check if any models are currently downloading (for re-entry)
   const checkActiveDownloads = async () => {
     try {
-      const models = await invoke<any[]>('parakeet_get_available_models');
-      const isDownloading = models.some(m => m.status && (typeof m.status === 'object' ? 'Downloading' in m.status : m.status === 'Downloading'));
-      
-      if (isDownloading) {
-        console.log('[OnboardingContext] Detected active background downloads on mount');
-        setIsBackgroundDownloading(true);
+      if (isArabic) {
+        // For Arabic locale, check Whisper download status
+        const models = await invoke<any[]>('whisper_get_available_models');
+        const isDownloading = models.some(m => m.status && (typeof m.status === 'object' ? 'Downloading' in m.status : m.status === 'Downloading'));
+        if (isDownloading) {
+          console.log('[OnboardingContext] Detected active Whisper download on mount (Arabic)');
+          setIsBackgroundDownloading(true);
+        }
+      } else {
+        const models = await invoke<any[]>('parakeet_get_available_models');
+        const isDownloading = models.some(m => m.status && (typeof m.status === 'object' ? 'Downloading' in m.status : m.status === 'Downloading'));
+        if (isDownloading) {
+          console.log('[OnboardingContext] Detected active background downloads on mount');
+          setIsBackgroundDownloading(true);
+        }
       }
-      
-      // Also check for Gemma/Built-in AI downloads if possible (though less critical as Parakeet is the main blocker)
-      
     } catch (error) {
       console.warn('[OnboardingContext] Failed to check active downloads:', error);
     }

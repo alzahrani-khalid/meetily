@@ -5,10 +5,12 @@ import { Mic, Sparkles, Check, Loader2, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { OnboardingContainer } from '../OnboardingContainer';
 import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useLocale } from '@/providers/I18nProvider';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const PARAKEET_MODEL = 'parakeet-tdt-0.6b-v3-int8';
+const WHISPER_ARABIC_MODEL = 'large-v3';
 
 type DownloadStatus = 'waiting' | 'downloading' | 'completed' | 'error';
 
@@ -34,6 +36,8 @@ export function DownloadProgressStep() {
     completeOnboarding,
   } = useOnboarding();
 
+  const locale = useLocale();
+  const isArabic = locale === 'ar';
   const [recommendedModel, setRecommendedModel] = useState<string>('gemma3:1b');
   const [isMac, setIsMac] = useState(false);
 
@@ -66,7 +70,7 @@ export function DownloadProgressStep() {
       return;
     }
 
-    console.log('[DownloadProgressStep] Retrying Parakeet download');
+    console.log('[DownloadProgressStep] Retrying transcription model download');
     retryingRef.current = true;
 
     // Reset error state
@@ -80,7 +84,11 @@ export function DownloadProgressStep() {
     }));
 
     try {
-      await invoke('parakeet_retry_download', { modelName: PARAKEET_MODEL });
+      if (isArabic) {
+        await invoke('whisper_download_model', { modelName: WHISPER_ARABIC_MODEL });
+      } else {
+        await invoke('parakeet_retry_download', { modelName: PARAKEET_MODEL });
+      }
       // Progress events will update state
     } catch (error) {
       console.error('[DownloadProgressStep] Retry failed:', error);
@@ -178,8 +186,13 @@ export function DownloadProgressStep() {
     startDownloads();
   }, []);
 
-  // Listen to Parakeet download progress
+  // Listen to transcription model download progress (Parakeet for English, Whisper for Arabic)
   useEffect(() => {
+    const progressEvent = isArabic ? 'model-download-progress' : 'parakeet-model-download-progress';
+    const completeEvent = isArabic ? 'model-download-complete' : 'parakeet-model-download-complete';
+    const errorEvent = isArabic ? 'model-download-error' : 'parakeet-model-download-error';
+    const targetModel = isArabic ? WHISPER_ARABIC_MODEL : PARAKEET_MODEL;
+
     const unlistenProgress = listen<{
       modelName: string;
       progress: number;
@@ -187,9 +200,9 @@ export function DownloadProgressStep() {
       total_mb?: number;
       speed_mbps?: number;
       status?: string;
-    }>('parakeet-model-download-progress', (event) => {
+    }>(progressEvent, (event) => {
       const { modelName, progress, downloaded_mb, total_mb, speed_mbps, status } = event.payload;
-      if (modelName === PARAKEET_MODEL) {
+      if (modelName === targetModel) {
         setParakeetState((prev) => ({
           ...prev,
           status: status === 'completed' ? 'completed' : 'downloading',
@@ -206,9 +219,9 @@ export function DownloadProgressStep() {
     });
 
     const unlistenComplete = listen<{ modelName: string }>(
-      'parakeet-model-download-complete',
+      completeEvent,
       (event) => {
-        if (event.payload.modelName === PARAKEET_MODEL) {
+        if (event.payload.modelName === targetModel) {
           setParakeetState((prev) => ({ ...prev, status: 'completed', progress: 100 }));
           setParakeetDownloaded(true);
         }
@@ -216,9 +229,9 @@ export function DownloadProgressStep() {
     );
 
     const unlistenError = listen<{ modelName: string; error: string }>(
-      'parakeet-model-download-error',
+      errorEvent,
       (event) => {
-        if (event.payload.modelName === PARAKEET_MODEL) {
+        if (event.payload.modelName === targetModel) {
           setParakeetState((prev) => ({
             ...prev,
             status: 'error',
@@ -233,7 +246,7 @@ export function DownloadProgressStep() {
       unlistenComplete.then((fn) => fn());
       unlistenError.then((fn) => fn());
     };
-  }, []);
+  }, [isArabic]);
 
   // Listen to Gemma download progress (always downloading for builtin-ai)
   useEffect(() => {
@@ -296,8 +309,15 @@ export function DownloadProgressStep() {
   const handleContinue = async () => {
     // Verify actual model availability (catches state drift)
     try {
-      await invoke('parakeet_init');
-      const actuallyAvailable = await invoke<boolean>('parakeet_has_available_models');
+      let actuallyAvailable = false;
+      if (isArabic) {
+        const whisperModels = await invoke<any[]>('whisper_get_available_models');
+        const largeV3 = whisperModels.find((m: any) => m.name === WHISPER_ARABIC_MODEL);
+        actuallyAvailable = largeV3?.status === 'Available';
+      } else {
+        await invoke('parakeet_init');
+        actuallyAvailable = await invoke<boolean>('parakeet_has_available_models');
+      }
 
       if (actuallyAvailable && !parakeetDownloaded) {
         console.log('[DownloadProgressStep] Model available but state not updated');

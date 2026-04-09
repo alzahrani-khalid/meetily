@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useLocale } from '@/providers/I18nProvider';
 import {
   WelcomeStep,
   PermissionsStep,
@@ -14,6 +15,8 @@ interface OnboardingFlowProps {
 export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const { currentStep } = useOnboarding();
   const [isMac, setIsMac] = React.useState(false);
+  const locale = useLocale();
+  const isArabic = locale === 'ar';
 
   useEffect(() => {
     // Check if running on macOS
@@ -41,7 +44,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     <div className="onboarding-flow">
       {currentStep === 1 && <WelcomeStep />}
       {currentStep === 2 && <SetupOverviewStep />}
-      {currentStep === 3 && <DownloadProgressStep />}
+      {/* Arabic: skip DownloadProgressStep — Whisper download is handled by WhisperDownloadGate on the main page */}
+      {currentStep === 3 && !isArabic && <DownloadProgressStep />}
+      {/* Arabic: step 3 goes directly to permissions on macOS */}
+      {currentStep === 3 && isArabic && isMac && <PermissionsStep />}
       {currentStep === 4 && isMac && <PermissionsStep />}
     </div>
   );
