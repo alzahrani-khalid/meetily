@@ -22,7 +22,7 @@ created: 2026-04-09
 | Component library | radix |
 | Icon library | lucide |
 | Font (LTR) | Source Sans 3, weights 400 + 600 |
-| Font (RTL) | Tajawal, weights 400 + 500 |
+| Font (RTL) | Tajawal, weights 400 + 600 |
 
 **Source:** `components.json`, Phase 2 CONTEXT.md, `tailwind.config.ts`
 
@@ -50,22 +50,28 @@ Exceptions: Touch targets for sidebar collapse button use 44x44px minimum (`min-
 
 ## Typography
 
-No new typography is introduced in this phase. The existing type scale from `tailwind.config.ts` is the contract:
+No new typography is introduced in this phase. The type scale is collapsed to 4 sizes and 2 weights:
 
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
+| Label / Caption | 14px (`text-small`) | 400 | 1.5 |
 | Body | 16px (`text-body`) | 400 | 1.6 |
-| Label / Small | 14px (`text-small`) | 400 | 1.5 |
-| Heading (h2) | 18px (`text-h2`) | 500 | 1.4 |
-| Heading (h1) | 24px (`text-h1`) | 600 | 1.3 |
-| Display | 32px (`text-display`) | 700 | 1.2 |
-| Caption | 12px (`text-caption`) | 400 | 1.4 |
+| Heading | 24px (`text-h1`) | 600 | 1.3 |
+| Display | 32px (`text-display`) | 600 | 1.2 |
 
-**RTL font rule:** All Arabic text uses Tajawal (400/500). All English text uses Source Sans 3 (400/600). Font selection is handled by `globals.css` `[dir="rtl"]` selectors from Phase 2. No changes needed in this phase.
+**Weight rules:** All body, label, and caption text uses weight 400 (regular). All headings and display text uses weight 600 (semibold).
+
+**Migration from previous scale:**
+- 12px Caption merged into 14px Label — captions use 14px at reduced opacity (`text-muted-foreground`) for visual distinction.
+- 18px Heading h2 merged into 24px Heading — former h2 usages promoted to 24px at weight 600. Where a lighter sub-heading is needed, use 16px Body at weight 600.
+- Weight 500 (Tajawal medium) remapped to 400 (regular). Tajawal renders well at 400; the visual difference from 500 is negligible.
+- Weight 700 (display bold) remapped to 600 (semibold). Display text at 32px has sufficient visual weight at 600.
+
+**RTL font rule:** All Arabic text uses Tajawal (400/600). All English text uses Source Sans 3 (400/600). Font selection is handled by `globals.css` `[dir="rtl"]` selectors from Phase 2. No changes needed in this phase.
 
 **BlockNote editor font:** Remove `@blocknote/core/fonts/inter.css` import. Editor inherits Tajawal (RTL) or Source Sans 3 (LTR) from global CSS cascade.
 
-**Source:** `tailwind.config.ts` lines 20-27, Phase 2 implementation.
+**Source:** `tailwind.config.ts` lines 20-27, Phase 2 implementation. Collapsed per UI checker feedback.
 
 ---
 
