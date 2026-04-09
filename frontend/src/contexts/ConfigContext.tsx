@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { TranscriptModelProps } from '@/components/TranscriptSettings';
 import { SelectedDevices } from '@/components/DeviceSelection';
 import { configService, ModelConfig } from '@/services/configService';
-import { getUserPreferences, setUserPreferences } from '@/services/preferencesService';
+import { getUserPreferences, setUserPreferences, type UserPreferences } from '@/services/preferencesService';
 import { invoke } from '@tauri-apps/api/core';
 import Analytics from '@/lib/analytics';
 import { BetaFeatures, BetaFeatureKey, loadBetaFeatures, saveBetaFeatures } from '@/types/betaFeatures';
@@ -97,7 +97,12 @@ interface ConfigContextType {
 const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 
 
-export function ConfigProvider({ children }: { children: ReactNode }) {
+interface ConfigProviderProps {
+  children: ReactNode;
+  initialPreferences?: UserPreferences;
+}
+
+export function ConfigProvider({ children, initialPreferences }: ConfigProviderProps) {
   // Model configuration state
   const [modelConfig, setModelConfig] = useState<ModelConfig>({
     provider: 'ollama',
@@ -141,7 +146,11 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
   // getUserPreferences() (see mount effect below). Default 'auto' until
   // the first getUserPreferences() response lands. PREFS-01/PREFS-04:
   // replaces the legacy localStorage-backed initializer.
-  const [selectedLanguage, setSelectedLanguage] = useState<string>('auto');
+  // Phase 2: when initialPreferences is provided by layout.tsx bootstrap,
+  // seed immediately to avoid a double-fetch.
+  const [selectedLanguage, setSelectedLanguage] = useState<string>(
+    initialPreferences?.transcriptionLanguage ?? 'auto'
+  );
 
   // UI preferences state
   const [showConfidenceIndicator, setShowConfidenceIndicator] = useState<boolean>(() => {
@@ -213,7 +222,15 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
   // Replaces the legacy ':215 useEffect' startup-desync workaround — its
   // cause (the 4-way preferences desync) is removed in the same commit
   // per D-18 / PROJECT.md Constraints.
+  // Phase 2: when initialPreferences is provided by layout.tsx bootstrap,
+  // state is already seeded from the prop — skip the initial fetch.
   useEffect(() => {
+    // If initialPreferences was supplied by the layout, our state is already seeded.
+    // Skip the initial getUserPreferences() call to avoid a double-fetch.
+    if (initialPreferences !== undefined) {
+      return;
+    }
+    // Otherwise, preserve the Phase 1 behavior (fetch on mount).
     let cancelled = false;
     (async () => {
       try {
@@ -226,7 +243,7 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [initialPreferences]);
 
   // Load model configuration on mount
   useEffect(() => {
