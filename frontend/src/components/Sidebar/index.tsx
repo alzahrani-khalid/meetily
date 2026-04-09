@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { useRecordingState } from '@/contexts/RecordingStateContext';
 import { useImportDialog } from '@/contexts/ImportDialogContext';
 import { useConfig } from '@/contexts/ConfigContext';
+import { useLocale } from '@/providers/I18nProvider';
 
 import {
   Dialog,
@@ -59,6 +60,8 @@ const Sidebar: React.FC = () => {
 
   // Get recording state from RecordingStateContext (single source of truth)
   const { isRecording } = useRecordingState();
+  const locale = useLocale();
+  const isRTL = locale === 'ar';
   const { openImportDialog } = useImportDialog();
   const { betaFeatures } = useConfig();
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['meetings']));
@@ -587,12 +590,12 @@ const Sidebar: React.FC = () => {
           {item.type === 'folder' ? (
             <>
               {item.id === 'meetings' ? (
-                <Calendar className="w-4 h-4 mr-2" />
+                <Calendar className="w-4 h-4 me-2" />
               ) : item.id === 'notes' ? (
-                <Calendar className="w-4 h-4 mr-2" />
+                <Calendar className="w-4 h-4 me-2" />
               ) : null}
               <span className={depth === 0 ? "" : "font-medium"}>{item.title}</span>
-              <div className="ml-auto">
+              <div className="ms-auto">
                 {isExpanded ? (
                   <ChevronDown className="w-4 h-4 text-gray-500" />
                 ) : (
@@ -600,18 +603,18 @@ const Sidebar: React.FC = () => {
                 )}
               </div>
               {searchQuery && item.id === 'meetings' && isSearching && (
-                <span className="ml-2 text-xs text-blue-500 animate-pulse">Searching...</span>
+                <span className="ms-2 text-xs text-blue-500 animate-pulse">Searching...</span>
               )}
             </>
           ) : (
             <div className="flex flex-col w-full">
               <div className="flex items-center w-full">
                 {isMeetingItem ? (
-                  <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full mr-2 bg-gray-100">
+                  <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full me-2 bg-gray-100">
                     <File className="w-3.5 h-3.5 text-gray-600" />
                   </div>
                 ) : (
-                  <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full mr-2 bg-blue-100">
+                  <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full me-2 bg-blue-100">
                     <Plus className="w-3.5 h-3.5 text-blue-600" />
                   </div>
                 )}
@@ -644,7 +647,7 @@ const Sidebar: React.FC = () => {
 
               {/* Show transcript match snippet if available */}
               {hasTranscriptMatch && (
-                <div className="mt-1 ml-8 text-xs text-gray-500 bg-yellow-50 p-1.5 rounded border border-yellow-100 line-clamp-2">
+                <div className="mt-1 ms-8 text-xs text-gray-500 bg-yellow-50 p-1.5 rounded border border-yellow-100 line-clamp-2">
                   <span className="font-medium text-yellow-600">Match:</span> {matchingResult.matchContext}
                 </div>
               )}
@@ -652,7 +655,7 @@ const Sidebar: React.FC = () => {
           )}
         </div>
         {item.type === 'folder' && isExpanded && item.children && (
-          <div className="ml-1">
+          <div className="ms-1">
             {item.children.map(child => renderItem(child, depth + 1))}
           </div>
         )}
@@ -661,22 +664,22 @@ const Sidebar: React.FC = () => {
   };
 
   return (
-    <div className="fixed top-0 left-0 h-screen z-40">
+    <div className="fixed top-0 start-0 h-screen z-40">
       {/* Floating collapse button */}
       <button
         onClick={toggleCollapse}
-        className="absolute -right-6 top-20 z-50 p-1 bg-white hover:bg-gray-100 rounded-full shadow-lg border"
-        style={{ transform: 'translateX(50%)' }}
+        className="absolute -end-6 top-20 z-50 p-1 bg-white hover:bg-gray-100 rounded-full shadow-lg border"
+        style={{ transform: isRTL ? 'translateX(-50%)' : 'translateX(50%)' }}
       >
         {isCollapsed ? (
-          <ChevronRightCircle className="w-6 h-6" />
+          isRTL ? <ChevronLeftCircle className="w-6 h-6" /> : <ChevronRightCircle className="w-6 h-6" />
         ) : (
-          <ChevronLeftCircle className="w-6 h-6" />
+          isRTL ? <ChevronRightCircle className="w-6 h-6" /> : <ChevronLeftCircle className="w-6 h-6" />
         )}
       </button>
 
       <div
-        className={`h-screen bg-white border-r shadow-sm flex flex-col transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'
+        className={`h-screen bg-white border-e shadow-sm flex flex-col transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'
           }`}
       >
         {/*  Header with traffic light spacing */}
@@ -727,7 +730,7 @@ const Sidebar: React.FC = () => {
                 onClick={() => router.push('/')}
                 className="p-3  text-lg font-semibold items-center hover:bg-gray-100 h-10   flex mx-3 mt-3 rounded-lg cursor-pointer"
               >
-                <Home className="w-4 h-4 mr-2" />
+                <Home className="w-4 h-4 me-2" />
                 <span>Home</span>
               </div>
             )}
@@ -744,10 +747,10 @@ const Sidebar: React.FC = () => {
                     <div
                       className="flex items-center transition-all duration-150 p-3 text-lg font-semibold h-10 mx-3 mt-3 rounded-lg"
                     >
-                      <NotebookPen className="w-4 h-4 mr-2 text-gray-600" />
+                      <NotebookPen className="w-4 h-4 me-2 text-gray-600" />
                       <span className="text-gray-700">{item.title}</span>
                       {searchQuery && item.id === 'meetings' && isSearching && (
-                        <span className="ml-2 text-xs text-blue-500 animate-pulse">Searching...</span>
+                        <span className="ms-2 text-xs text-blue-500 animate-pulse">Searching...</span>
                       )}
                     </div>
                   </div>
@@ -781,12 +784,12 @@ const Sidebar: React.FC = () => {
             >
               {isRecording ? (
                 <>
-                  <Square className="w-4 h-4 mr-2" />
+                  <Square className="w-4 h-4 me-2" />
                   <span>Recording in progress...</span>
                 </>
               ) : (
                 <>
-                  <Mic className="w-4 h-4 mr-2" />
+                  <Mic className="w-4 h-4 me-2" />
                   <span>Start Recording</span>
                 </>
               )}
@@ -797,7 +800,7 @@ const Sidebar: React.FC = () => {
                 onClick={() => openImportDialog()}
                 className="w-full flex items-center justify-center px-3 py-2 mt-1 text-sm font-medium text-gray-700 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors shadow-sm"
               >
-                <Upload className="w-4 h-4 mr-2" />
+                <Upload className="w-4 h-4 me-2" />
                 <span>Import Audio</span>
               </button>
             )}
@@ -806,7 +809,7 @@ const Sidebar: React.FC = () => {
               onClick={() => router.push('/settings')}
               className="w-full flex items-center justify-center px-3 py-1.5 mt-1 mb-1 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors shadow-sm"
             >
-              <Settings className="w-4 h-4 mr-2" />
+              <Settings className="w-4 h-4 me-2" />
               <span>Settings</span>
             </button>
             <Info isCollapsed={isCollapsed} />
