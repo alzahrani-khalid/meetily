@@ -50,6 +50,10 @@ pub(crate) async fn test_pool_with_migration() -> SqlitePool {
     let migration_sql = include_str!(
         "../../migrations/20260407000000_add_user_preferences.sql"
     );
+    // Phase 2 migration — adds bootstrapped column
+    let migration2_sql = include_str!(
+        "../../migrations/20260409000000_add_preferences_bootstrapped_flag.sql"
+    );
     // Strip line-level `--` comments before splitting on ';'. Comments at the
     // top of the file would otherwise be lumped into the first statement chunk
     // (causing the CREATE TABLE to be silently skipped by the `starts_with("--")`
@@ -68,6 +72,22 @@ pub(crate) async fn test_pool_with_migration() -> SqlitePool {
                 .execute(&pool)
                 .await
                 .unwrap_or_else(|e| panic!("migration stmt failed: {} — err: {}", trimmed, e));
+        }
+    }
+
+    // Run Phase 2 migration (bootstrapped column)
+    let stripped2: String = migration2_sql
+        .lines()
+        .filter(|line| !line.trim_start().starts_with("--"))
+        .collect::<Vec<_>>()
+        .join("\n");
+    for stmt in stripped2.split(';') {
+        let trimmed = stmt.trim();
+        if !trimmed.is_empty() {
+            sqlx::query(trimmed)
+                .execute(&pool)
+                .await
+                .unwrap_or_else(|e| panic!("migration2 stmt failed: {} — err: {}", trimmed, e));
         }
     }
 
@@ -143,6 +163,7 @@ async fn atomic_write_auto_repoints_parakeet() {
         summary_language: None,
         transcription_language: None,
         provider: None,
+        ..Default::default()
     };
     let merged = repository::apply_patch_atomic(&pool, patch)
         .await
@@ -195,6 +216,7 @@ async fn rollback_leaves_cache_and_row_unchanged() {
         summary_language: None,
         transcription_language: None,
         provider: None,
+        ..Default::default()
     };
     let result = repository::apply_patch_atomic(&pool, patch).await;
 
@@ -249,6 +271,7 @@ async fn reject_parakeet_while_arabic() {
         summary_language: None,
         transcription_language: None,
         provider: Some("parakeet".to_string()),
+        ..Default::default()
     };
     let result = repository::apply_patch_atomic(&pool, patch).await;
 
@@ -288,12 +311,14 @@ async fn concurrent_setters_serialize() {
         summary_language: None,
         transcription_language: Some("en".to_string()),
         provider: None,
+        ..Default::default()
     };
     let patch2 = UserPreferencesPatch {
         ui_locale: None,
         summary_language: None,
         transcription_language: Some("fr".to_string()),
         provider: None,
+        ..Default::default()
     };
 
     // CRITICAL (Anti-Sampling Rule #3): both futures built before any .await.

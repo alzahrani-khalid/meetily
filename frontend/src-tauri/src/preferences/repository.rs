@@ -16,7 +16,7 @@ use super::{invariant, PreferencesError, UserPreferences, UserPreferencesPatch};
 /// Load the singleton `user_preferences` row.
 pub async fn load(pool: &SqlitePool) -> Result<UserPreferences, sqlx::Error> {
     sqlx::query_as::<_, UserPreferences>(
-        r#"SELECT id, ui_locale, summary_language, transcription_language, updated_at
+        r#"SELECT id, ui_locale, summary_language, transcription_language, updated_at, bootstrapped
            FROM user_preferences
            WHERE id = '1'
            LIMIT 1"#,
@@ -71,12 +71,14 @@ pub async fn apply_patch_atomic(
            SET ui_locale = ?,
                summary_language = ?,
                transcription_language = ?,
+               bootstrapped = ?,
                updated_at = strftime('%s','now')
            WHERE id = '1'"#,
     )
     .bind(&merged.ui_locale)
     .bind(&merged.summary_language)
     .bind(&merged.transcription_language)
+    .bind(merged.bootstrapped)
     .execute(&mut *tx)
     .await
     .map_err(PreferencesError::Database)?;
