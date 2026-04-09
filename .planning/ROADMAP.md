@@ -94,7 +94,13 @@ Plans:
   3. User in English UI mode requests an Arabic summary (or vice versa) and gets the locale they asked for — summary language is independent from UI locale
   4. User receives Arabic summaries with Arabic punctuation (`،` `؛` `؟`) because prompts are loaded via `prompts::get_prompt(id, "ar")`, not inline strings in `processor.rs`
   5. User views an Arabic summary in BlockNote following the path locked by the Phase 3 spike — editable if green, read-only rendered markdown if red (SUMM-04 fallback)
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 05-01-PLAN.md — 6 Arabic template JSONs + defaults.rs all-12-embed fix + locale-aware loader (TPL-01, TPL-02, SUMM-02)
+- [ ] 05-02-PLAN.md — Prompts module: 10 prompt .txt files + summary/prompts/ Rust module with include_str! embedding (TPL-03, TPL-04, SUMM-03)
+- [ ] 05-03-PLAN.md — Pipeline wiring: processor.rs prompt replacement + locale threading through commands/service/processor (SUMM-01, TPL-04)
+- [ ] 05-04-PLAN.md — BlockNote Arabic configuration + summary i18n strings (SUMM-04)
+**UI hint**: yes
 
 ### Phase 6: Rust Strings, QA & Release Hardening
 **Goal**: Every Rust-owned UI string is localized, every regression-prone surface has automated coverage, and the Arabic experience is verified end-to-end against real audio and real LLM providers.
