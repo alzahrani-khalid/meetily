@@ -25,5 +25,17 @@
         "bootstrapFailed": "تعذر تحميل التفضيلات. بدء التشغيل بالإنجليزية — اضبط اللغة من الإعدادات."
       }
     }
+  },
+  "transcriptSettings": {
+    "arabicBanner": "يستخدم Meetily نموذج Whisper large-v3 للنسخ العربي لأنه يوفر أعلى دقة للغة العربية"
+  },
+  "recording": {
+    "downloadingModel": "جاري تحميل نموذج النسخ العربي ({progress}%)...",
+    "modelReady": "نموذج النسخ العربي جاهز للاستخدام",
+    "modelDownloadError": "فشل تحميل النموذج. اضغط لإعادة المحاولة",
+    "noArabicModel": "يجب تحميل نموذج Whisper large-v3 للنسخ العربي"
+  },
+  "languageConfirm": {
+    "providerRepoint": "سيتم أيضاً تبديل مزود النسخ إلى Whisper large-v3 لدقة أعلى للعربية"
   }
 }

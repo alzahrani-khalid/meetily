@@ -25,5 +25,17 @@
         "bootstrapFailed": "Couldn't load preferences. Starting in English \u2014 set your language in Settings."
       }
     }
+  },
+  "transcriptSettings": {
+    "arabicBanner": "Meetily uses Whisper large-v3 for Arabic transcription as it provides the highest accuracy for Arabic"
+  },
+  "recording": {
+    "downloadingModel": "Downloading Arabic transcription model ({progress}%)...",
+    "modelReady": "Arabic transcription model ready to use",
+    "modelDownloadError": "Model download failed. Tap to retry",
+    "noArabicModel": "Whisper large-v3 model is required for Arabic transcription"
+  },
+  "languageConfirm": {
+    "providerRepoint": "The transcription provider will also be switched to Whisper large-v3 for higher Arabic accuracy"
   }
 }
