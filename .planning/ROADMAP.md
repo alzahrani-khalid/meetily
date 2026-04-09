@@ -108,7 +108,7 @@ Record a meeting, get an accurate transcript and a useful summary — in your ow
 | Phase                               | Milestone | Plans Complete | Status      | Completed  |
 | ----------------------------------- | --------- | -------------- | ----------- | ---------- |
 | 01. Preferences Foundation          | TBD       | 1/1            | Complete    | 2026-04-09 |
-| 02. I18n Framework Locale Bootstrap | TBD       | 4/5            | In Progress | -          |
+| 02. I18n Framework Locale Bootstrap | TBD       | 5/5            | Complete    | 2026-04-09 |
 
 <!-- gsd:progress:end -->
 
