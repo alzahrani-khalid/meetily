@@ -11,7 +11,7 @@ Requirements for the Arabic bilingual milestone. Each maps to exactly one roadma
 ### UI (Bilingual UI Surface)
 
 - [x] **UI-01**: User can launch Meetily on a system with `navigator.language` starting with `ar` and see the interface in Arabic on first run (detection with `en` fallback, per §12.1)
-- [ ] **UI-02**: User can switch UI language between Arabic and English from Settings
+- [x] **UI-02**: User can switch UI language between Arabic and English from Settings
 - [ ] **UI-03**: User switches language and the app triggers a full reload; the selection persists across restarts (§12.4 — reload, not hot-swap)
 - [ ] **UI-04**: User sees Arabic text rendered right-to-left in Tajawal (loaded via `next/font/google` alongside existing `Source_Sans_3`)
 - [ ] **UI-05**: User sees all layout elements mirror correctly in RTL across the 65 `.tsx` files / 286 directional hit surfaces: sidebar, top bar, dialogs, buttons, dropdowns, menus, icons
@@ -96,8 +96,9 @@ Which phases cover which requirements. Populated by the roadmapper.
 | PREFS-02 | Phase 1 | Pending |
 | PREFS-03 | Phase 1 | Pending |
 | PREFS-04 | Phase 1 | Pending |
+<<<<<<< HEAD
 | UI-01 | Phase 2 | Complete |
-| UI-02 | Phase 2 | Pending |
+| UI-02 | Phase 2 | Complete |
 | UI-03 | Phase 2 | Pending |
 | UI-04 | Phase 2 | Pending |
 | UI-05 | Phase 3 | Pending |
