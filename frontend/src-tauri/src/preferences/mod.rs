@@ -39,6 +39,7 @@ pub struct UserPreferences {
     pub summary_language: String,
     pub transcription_language: String,
     pub updated_at: i64,
+    pub bootstrapped: bool,
 }
 
 impl UserPreferences {
@@ -55,6 +56,9 @@ impl UserPreferences {
         }
         if let Some(ref v) = patch.transcription_language {
             out.transcription_language = v.clone();
+        }
+        if let Some(v) = patch.bootstrapped {
+            out.bootstrapped = v;
         }
         out
     }
@@ -79,6 +83,8 @@ pub struct UserPreferencesPatch {
     /// branch (see `invariant::check_reject_branch`) reads this field.
     #[serde(default)]
     pub provider: Option<String>,
+    #[serde(default)]
+    pub bootstrapped: Option<bool>,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -99,6 +105,7 @@ pub(crate) static PREFS_CACHE: Lazy<RwLock<UserPreferences>> = Lazy::new(|| {
         summary_language: "en".to_string(),
         transcription_language: "auto".to_string(),
         updated_at: 0,
+        bootstrapped: false,
     })
 });
 
