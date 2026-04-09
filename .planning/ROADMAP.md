@@ -79,7 +79,10 @@ Plans:
   2. User in Arabic mode opens `TranscriptSettings` and sees no Parakeet option in the model dropdown; an explanatory banner explains why
   3. User completes Arabic onboarding without being blocked on the ~3GB Whisper `large-v3` download — onboarding finishes immediately and a "ready to record" gate waits for the model in the background
   4. User switching `uiLocale` from `en` to `ar` from Settings has their `transcript_settings.provider` automatically rewritten to `localWhisper` + `large-v3` inside the same `set_user_preferences` transaction — no separate UI step
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 04-01-PLAN.md — TranscriptSettings Parakeet filter + Arabic info banner + LanguageConfirmDialog repoint notice + i18n strings (TRANS-02, TRANS-04)
+- [ ] 04-02-PLAN.md — Whisper download gate + onboarding fork + locale-aware recording start + page.tsx integration (TRANS-01, TRANS-03, TRANS-04)
 
 ### Phase 5: Templates & Prompts (Bilingual Content)
 **Goal**: All 6 meeting templates and all 5 LLM prompts exist in both English and Arabic, resolved through a single locale-aware loader, with the pre-existing `defaults.rs` 2/6 embed gap fixed.
