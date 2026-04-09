@@ -77,7 +77,7 @@ export function SetupOverviewStep() {
                   key={step.number}
                   className={`flex items-start gap-4 p-1`}
                 >
-                  <div className="flex-1 ml-1">
+                  <div className="flex-1 ms-1">
                     <h3 className="font-medium text-gray-900 flex items-center gap-2">
                         Step {step.number} :  {step.title}
 

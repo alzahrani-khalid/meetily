@@ -64,7 +64,7 @@ export function TranscriptButtonGroup({
           }}
           title="Open Recording Folder"
         >
-          <FolderOpen className="xl:mr-2" size={18} />
+          <FolderOpen className="xl:me-2" size={18} />
           <span className="hidden lg:inline">Recording</span>
         </Button>
 
@@ -79,7 +79,7 @@ export function TranscriptButtonGroup({
             }}
             title="Retranscribe to enhance your recorded audio"
           >
-            <RefreshCw className="xl:mr-2" size={18} />
+            <RefreshCw className="xl:me-2" size={18} />
             <span className="hidden lg:inline">Enhance</span>
           </Button>
         )}

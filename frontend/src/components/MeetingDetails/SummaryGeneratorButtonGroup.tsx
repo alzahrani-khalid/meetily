@@ -252,7 +252,7 @@ export function SummaryGeneratorButtonGroup({
           }}
           title="Stop summary generation"
         >
-          <Square className="xl:mr-2" size={18} fill="currentColor" />
+          <Square className="xl:me-2" size={18} fill="currentColor" />
           <span className="hidden lg:inline xl:inline">Stop</span>
         </Button>
       ) : (
@@ -275,12 +275,12 @@ export function SummaryGeneratorButtonGroup({
         >
           {isCheckingModels || isModelConfigLoading ? (
             <>
-              <Loader2 className="animate-spin xl:mr-2" size={18} />
+              <Loader2 className="animate-spin xl:me-2" size={18} />
               <span className="hidden xl:inline">Processing...</span>
             </>
           ) : (
             <>
-              <Sparkles className="xl:mr-2" size={18} />
+              <Sparkles className="xl:me-2" size={18} />
               <span className="hidden lg:inline xl:inline">Generate Summary</span>
             </>
           )}

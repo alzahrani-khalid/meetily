@@ -91,7 +91,7 @@ export function SettingsModals({
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Summarization Model
                   </label>
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-2 rtl:space-x-reverse">
                     <select
                       className="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                       value={modelConfig.provider}
@@ -133,7 +133,7 @@ export function SettingsModals({
                         {error}
                       </div>
                     )}
-                    <div className="grid gap-4 max-h-[400px] overflow-y-auto pr-2">
+                    <div className="grid gap-4 max-h-[400px] overflow-y-auto pe-2">
                       {models.map((model) => (
                         <div
                           key={model.id}
@@ -312,7 +312,7 @@ export function SettingsModals({
             {messages.errorAlert}
             <button
               onClick={() => onClose('errorAlert')}
-              className="ml-2 text-red-600 hover:text-red-800 underline"
+              className="ms-2 text-red-600 hover:text-red-800 underline"
             >
               Dismiss
             </button>
@@ -330,7 +330,7 @@ export function SettingsModals({
             {messages.chunkDropWarning}
             <button
               onClick={() => onClose('chunkDropWarning')}
-              className="ml-2 text-yellow-600 hover:text-yellow-800 underline"
+              className="ms-2 text-yellow-600 hover:text-yellow-800 underline"
             >
               Dismiss
             </button>

@@ -342,9 +342,9 @@ export const RecordingControls: React.FC<RecordingControlsProps> = ({
   return (
     <TooltipProvider>
       <div className="flex flex-col space-y-2">
-        <div className="flex items-center space-x-2 bg-white rounded-full shadow-lg px-4 py-2">
+        <div className="flex items-center space-x-2 rtl:space-x-reverse bg-white rounded-full shadow-lg px-4 py-2">
           {isProcessing && !isParentProcessing ? (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900"></div>
               <span className="text-sm text-gray-600">Processing recording...</span>
             </div>
@@ -361,7 +361,7 @@ export const RecordingControls: React.FC<RecordingControlsProps> = ({
 
                   <div className="w-px h-6 bg-gray-200 mx-1" />
 
-                  <div className="flex items-center space-x-1 mx-2">
+                  <div className="flex items-center space-x-1 rtl:space-x-reverse mx-2">
                     <div className="text-sm text-gray-600 min-w-[40px]">
                       {formatTime(currentTime)}
                     </div>
@@ -471,7 +471,7 @@ export const RecordingControls: React.FC<RecordingControlsProps> = ({
                     </>
                   )}
 
-                  <div className="flex items-center space-x-1 mx-4">
+                  <div className="flex items-center space-x-1 rtl:space-x-reverse mx-4">
                     {barHeights.map((height, index) => (
                       <div
                         key={index}
@@ -513,7 +513,7 @@ export const RecordingControls: React.FC<RecordingControlsProps> = ({
             </AlertTitle>
             <AlertDescription className="text-red-700">
               {deviceError.message.split('\n').map((line, i) => (
-                <div key={i} className={i > 0 ? 'ml-2' : ''}>
+                <div key={i} className={i > 0 ? 'ms-2' : ''}>
                   {line}
                 </div>
               ))}

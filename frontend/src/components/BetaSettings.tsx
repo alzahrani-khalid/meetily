@@ -50,7 +50,7 @@ export function BetaSettings() {
               </p>
             </div>
 
-            <div className="ml-6">
+            <div className="ms-6">
               <Switch
                 checked={betaFeatures[featureKey]}
                 onCheckedChange={(checked) => toggleBetaFeature(featureKey, checked)}

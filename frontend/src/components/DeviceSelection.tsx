@@ -229,7 +229,7 @@ export function DeviceSelection({ selectedDevices, onDeviceChange, disabled = fa
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-medium text-gray-900">Audio Devices</h4>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 rtl:space-x-reverse">
           {/* TODO: Monitoring */}
           {/* <button */}
           {/*   onClick={toggleAudioLevelMonitoring} */}

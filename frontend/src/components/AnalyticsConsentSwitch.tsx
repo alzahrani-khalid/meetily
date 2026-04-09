@@ -169,7 +169,7 @@ export default function AnalyticsConsentSwitch() {
               {isProcessing ? 'Updating...' : 'Anonymous usage patterns only'}
             </p>
           </div>
-          <div className="flex items-center gap-2 ml-4">
+          <div className="flex items-center gap-2 ms-4">
             {isProcessing && (
               <Loader2 className="w-4 h-4 animate-spin text-gray-500" />
             )}

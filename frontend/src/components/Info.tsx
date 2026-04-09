@@ -23,7 +23,7 @@ const Info = React.forwardRef<HTMLButtonElement, InfoProps>(({ isCollapsed }, re
         >
           <InfoIcon className={`text-gray-600 ${isCollapsed ? "w-5 h-5" : "w-4 h-4"}`} />
           {!isCollapsed && (
-            <span className="ml-2 text-sm text-gray-700">About</span>
+            <span className="ms-2 text-sm text-gray-700">About</span>
           )}
         </button>
       </DialogTrigger>

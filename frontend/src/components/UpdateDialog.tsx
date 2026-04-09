@@ -281,7 +281,7 @@ export function UpdateDialog({ open, onOpenChange, updateInfo }: UpdateDialogPro
                 Later
               </Button>
               <Button onClick={handleDownloadAndInstall} className="bg-blue-600 hover:bg-blue-700">
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="h-4 w-4 me-2" />
                 Download & Install
               </Button>
             </>

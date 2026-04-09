@@ -583,16 +583,16 @@ function ModelCard({
             </div>
 
             {/* Model Specs */}
-            <div className="flex items-center space-x-4 text-sm text-gray-600 ml-9 mt-1.5">
-              <span className="flex items-center space-x-1">
+            <div className="flex items-center space-x-4 rtl:space-x-reverse text-sm text-gray-600 ms-9 mt-1.5">
+              <span className="flex items-center space-x-1 rtl:space-x-reverse">
                 <span>📦</span>
                 <span>{formatFileSize(model.size_mb)}</span>
               </span>
-              <span className="flex items-center space-x-1">
+              <span className="flex items-center space-x-1 rtl:space-x-reverse">
                 <span>🎯</span>
                 <span>{model.accuracy} accuracy</span>
               </span>
-              <span className="flex items-center space-x-1">
+              <span className="flex items-center space-x-1 rtl:space-x-reverse">
                 <span>⚡</span>
                 <span>{model.speed} processing</span>
               </span>
@@ -600,7 +600,7 @@ function ModelCard({
           </div>
 
           {/* Status/Action */}
-          <div className="ml-4 flex items-center gap-2">
+          <div className="ms-4 flex items-center gap-2">
             {isAvailable && (
               <>
                 <div className="flex items-center gap-1.5 text-green-600">

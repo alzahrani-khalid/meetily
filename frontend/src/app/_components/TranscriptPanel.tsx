@@ -55,7 +55,7 @@ export function TranscriptPanel({
       <div className="sticky top-0 z-10 bg-white p-4 border-gray-200">
         <div className="flex flex-col space-y-3">
           <div className="flex  flex-col space-y-2">
-            <div className="flex justify-center  items-center space-x-2">
+            <div className="flex justify-center  items-center space-x-2 rtl:space-x-reverse">
               <ButtonGroup>
                 {transcripts?.length > 0 && (
                   <Button

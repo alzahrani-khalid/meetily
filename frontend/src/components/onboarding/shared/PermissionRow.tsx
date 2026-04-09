@@ -57,7 +57,7 @@ export function PermissionRow({ icon, title, description, status, isPending = fa
       </div>
 
       {/* Right side: Action button or checkmark */}
-      <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+      <div className="flex items-center gap-2 flex-shrink-0 ms-3">
         {!isAuthorized && (
           <Button
             variant={isDenied ? "destructive" : "outline"}
@@ -66,7 +66,7 @@ export function PermissionRow({ icon, title, description, status, isPending = fa
             disabled={isChecking}
             className="min-w-[100px]"
           >
-            {isChecking && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isChecking && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
             {getButtonText()}
           </Button>
         )}

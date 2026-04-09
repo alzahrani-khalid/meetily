@@ -496,11 +496,11 @@ function ModelCard({
             </div>
 
             {/* Tagline */}
-            <p className="text-sm text-gray-600 ml-9">{tagline}</p>
+            <p className="text-sm text-gray-600 ms-9">{tagline}</p>
           </div>
 
           {/* Status/Action */}
-          <div className="ml-4 flex items-center gap-2">
+          <div className="ms-4 flex items-center gap-2">
             {isAvailable && (
               <>
                 <div className="flex items-center gap-1.5 text-green-600">

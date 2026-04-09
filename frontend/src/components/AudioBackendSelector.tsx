@@ -151,7 +151,7 @@ export function AudioBackendSelector({
                 disabled={isDisabled}
                 className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
               />
-              <div className="ml-3 flex-1">
+              <div className="ms-3 flex-1">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-900">
                     {backend.name}

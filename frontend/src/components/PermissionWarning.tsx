@@ -102,7 +102,7 @@ export function PermissionWarning({
                 </p>
                 <div className="space-y-2 text-sm mb-4">
                   <p className="font-medium">Please check:</p>
-                  <ul className="list-disc list-inside ml-2 space-y-1">
+                  <ul className="list-disc list-inside ms-2 space-y-1">
                     <li>Your microphone is connected and powered on</li>
                     <li>Microphone permission is granted in System Settings</li>
                     <li>No other app is exclusively using the microphone</li>
@@ -122,7 +122,7 @@ export function PermissionWarning({
                 {isMacOS && (
                   <div className="space-y-2 text-sm mb-4">
                     <p className="font-medium">To enable system audio on macOS:</p>
-                    <ul className="list-disc list-inside ml-2 space-y-1">
+                    <ul className="list-disc list-inside ms-2 space-y-1">
                       <li>Install a virtual audio device (e.g., BlackHole 2ch)</li>
                       <li>Grant Screen Recording permission to Meetily</li>
                       <li>Configure your audio routing in Audio MIDI Setup</li>

@@ -106,7 +106,7 @@ export function TranscriptSettings({ transcriptModelConfig, setTranscriptModelCo
                         <Label className="block text-sm font-medium text-gray-700 mb-1">
                             Transcript Model
                         </Label>
-                        <div className="flex space-x-2 mx-1">
+                        <div className="flex space-x-2 rtl:space-x-reverse mx-1">
                             <Select
                                 value={uiProvider}
                                 onValueChange={(value) => {
@@ -181,7 +181,7 @@ export function TranscriptSettings({ transcriptModelConfig, setTranscriptModelCo
                             <div className="relative mx-1">
                                 <Input
                                     type={showApiKey ? "text" : "password"}
-                                    className={`pr-24 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${isApiKeyLocked ? 'bg-gray-100 cursor-not-allowed' : ''
+                                    className={`pe-24 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${isApiKeyLocked ? 'bg-gray-100 cursor-not-allowed' : ''
                                         }`}
                                     value={apiKey || ''}
                                     onChange={(e) => setApiKey(e.target.value)}
@@ -195,7 +195,7 @@ export function TranscriptSettings({ transcriptModelConfig, setTranscriptModelCo
                                         className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-50 rounded-md cursor-not-allowed"
                                     />
                                 )}
-                                <div className="absolute inset-y-0 right-0 pr-1 flex items-center">
+                                <div className="absolute inset-y-0 end-0 pe-1 flex items-center">
                                     <Button
                                         type="button"
                                         variant="ghost"

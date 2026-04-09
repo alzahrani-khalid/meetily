@@ -75,12 +75,12 @@ export function About() {
                     >
                         {isChecking ? (
                             <>
-                                <Loader2 className="h-3 w-3 mr-2 animate-spin" />
+                                <Loader2 className="h-3 w-3 me-2 animate-spin" />
                                 Checking...
                             </>
                         ) : (
                             <>
-                                <CheckCircle2 className="h-3 w-3 mr-2" />
+                                <CheckCircle2 className="h-3 w-3 me-2" />
                                 Check for Updates
                             </>
                         )}

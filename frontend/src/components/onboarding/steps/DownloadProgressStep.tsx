@@ -491,7 +491,7 @@ export function DownloadProgressStep() {
             className="w-full h-11 bg-gray-900 hover:bg-gray-800 text-white disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {(isCompleting || !parakeetDownloaded) ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              <Loader2 className="w-4 h-4 me-2 animate-spin" />
             ) : (
               'Continue'
             )}

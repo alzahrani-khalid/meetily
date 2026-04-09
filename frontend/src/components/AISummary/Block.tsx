@@ -228,7 +228,7 @@ export const BlockComponent: React.FC<BlockProps> = ({
       onContextMenu={onContextMenu}
     >
       {block.type === 'bullet' && (
-        <div className="flex-shrink-0 mr-2 select-none mt-[2px]">•</div>
+        <div className="flex-shrink-0 me-2 select-none mt-[2px]">•</div>
       )}
 
       <div className="relative flex-1 py-0.5 px-1">
@@ -256,14 +256,14 @@ export const BlockComponent: React.FC<BlockProps> = ({
         {showCommands && (
           <div 
             ref={commandsRef}
-            className="absolute left-0 top-full mt-1 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50
+            className="absolute start-0 top-full mt-1 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50
                        animate-in fade-in slide-in-from-top-2 duration-150"
           >
             {filteredCommands.map((cmd, index) => (
               <button
                 key={cmd.id}
                 className={`
-                  w-full text-left px-3 py-2 flex items-center space-x-3 hover:bg-gray-50
+                  w-full text-start px-3 py-2 flex items-center space-x-3 rtl:space-x-reverse hover:bg-gray-50
                   ${index === selectedCommandIndex ? 'bg-gray-50' : ''}
                 `}
                 onClick={() => handleCommandSelect(cmd)}

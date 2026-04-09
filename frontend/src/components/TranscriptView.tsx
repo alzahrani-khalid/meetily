@@ -312,7 +312,7 @@ export const TranscriptView: React.FC<TranscriptViewProps> = ({ transcripts, isR
                       <p className="text-base text-gray-800 leading-relaxed" style={{ visibility: 'hidden' }}>
                         {sizerText}
                       </p>
-                      <p className="text-base text-gray-800 leading-relaxed absolute top-0 left-0">
+                      <p className="text-base text-gray-800 leading-relaxed absolute top-0 start-0">
                         {displayText}
                       </p>
                     </div>
