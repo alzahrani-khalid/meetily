@@ -61,7 +61,12 @@ Record a meeting, get an accurate transcript and a useful summary — in your ow
   3. User running the dev build with a new `ml-*` / `mr-*` / `pl-*` / `pr-*` / `text-left` / `text-right` / `border-l-*` / `border-r-*` / `rounded-l-*` / `rounded-r-*` class anywhere under `frontend/src/**/*.tsx` sees an ESLint error at PR time
   4. The BlockNote spike (first plan in this phase) produces a written decision answering all 4 questions in spec §7 and the SUMM-04 editable-vs-readonly path is locked before any summary-rendering work begins
   5. The remaining 55 non-hotspot `.tsx` files are swept and contain zero physical-direction classes
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 03-01-PLAN.md — BlockNote RTL spike (decision gate for SUMM-04)
+- [ ] 03-02-PLAN.md — ESLint guardrail rule (QA-07)
+- [ ] 03-03-PLAN.md — Hotspot conversion (10 files + sidebar animation UI-06)
+- [ ] 03-04-PLAN.md — Sweep conversion (remaining ~46 files, zero physical-direction classes)
 **UI hint**: yes
 **Phase note**: This phase opens with a 1-day BlockNote RTL spike (decision gate for SUMM-04), then ESLint rule, then hotspot batch (10 files / 146 hits), then sweep batch (55 files / 140 hits). Spike-as-first-plan rather than its own phase per spec §11 + standard granularity guidance.
 
