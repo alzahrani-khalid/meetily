@@ -34,6 +34,6 @@ export function I18nProvider({ locale, messages, children }: I18nProviderProps) 
   );
 }
 
-// Re-export useTranslations so Plan 05 components can import from @/providers/I18nProvider
+// Re-export useTranslations and useLocale so Plan 05 components can import from @/providers/I18nProvider
 // (preserves D-07: I18nProvider.tsx is the sole file importing from 'next-intl')
-export { useTranslations } from 'next-intl';
+export { useTranslations, useLocale } from 'next-intl';
