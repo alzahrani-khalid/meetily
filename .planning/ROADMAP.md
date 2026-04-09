@@ -12,8 +12,8 @@ Record a meeting, get an accurate transcript and a useful summary — in your ow
 
 ## Phases
 
-- [ ] **Phase 1: Preferences Foundation** — Single-source-of-truth `user_preferences` SQLite + Rust module with atomic Parakeet-ban invariant
-- [ ] **Phase 2: i18n Framework & Locale Bootstrap** — `next-intl` client provider, Tajawal font, `<html lang dir>` switch, locale detection, full-reload locale switching
+- [x] **Phase 1: Preferences Foundation** — Single-source-of-truth `user_preferences` SQLite + Rust module with atomic Parakeet-ban invariant
+- [x] **Phase 2: i18n Framework & Locale Bootstrap** — `next-intl` client provider, Tajawal font, `<html lang dir>` switch, locale detection, full-reload locale switching
 - [ ] **Phase 3: RTL Layout Conversion** — BlockNote spike, ESLint guardrail, hotspot-first conversion of 286 directional hits across 65 files
 - [ ] **Phase 4: Arabic Transcription Policy** — Whisper `large-v3`-only Arabic path, Parakeet ban enforcement at UI + onboarding, non-blocking large-v3 download
 - [ ] **Phase 5: Templates & Prompts (Bilingual Content)** — Locale-suffix loader, `defaults.rs` 2/6 embed fix, externalized prompts, 6 AR templates + 5 AR prompts authored in MSA
@@ -44,11 +44,11 @@ Record a meeting, get an accurate transcript and a useful summary — in your ow
   3. User opens Settings, switches language, confirms — the app performs a full reload and the new locale is active on the next mount, persisted across subsequent restarts
   4. User on first paint never sees a flash of LTR English chrome before Arabic loads (boot splash gates the provider tree until preferences resolve)
 **Plans**: 5 plans
-- [ ] 02-01-PLAN.md — DB layer: bootstrapped column migration + Rust struct + TypeScript type (UI-01, UI-03)
-- [ ] 02-02-PLAN.md — bootstrapLocale pure helper + Vitest T2-01..T2-06 test suite (UI-01)
-- [ ] 02-03-PLAN.md — next-intl install + I18nProvider + messages/en.json + messages/ar.json + shadcn alert-dialog/radio-group (UI-02)
-- [ ] 02-04-PLAN.md — Layout integration: Tajawal font + bootstrap useEffect + I18nProvider wire + globals.css dir selectors + ConfigProvider initialPreferences prop (UI-01, UI-03, UI-04)
-- [ ] 02-05-PLAN.md — BootSplash + LanguageSwitcher + LanguageConfirmDialog + SettingsModal Interface Language section (UI-02, UI-03)
+- [x] 02-01-PLAN.md — DB layer: bootstrapped column migration + Rust struct + TypeScript type (UI-01, UI-03)
+- [x] 02-02-PLAN.md — bootstrapLocale pure helper + Vitest T2-01..T2-06 test suite (UI-01)
+- [x] 02-03-PLAN.md — next-intl install + I18nProvider + messages/en.json + messages/ar.json + shadcn alert-dialog/radio-group (UI-02)
+- [x] 02-04-PLAN.md — Layout integration: Tajawal font + bootstrap useEffect + I18nProvider wire + globals.css dir selectors + ConfigProvider initialPreferences prop (UI-01, UI-03, UI-04)
+- [x] 02-05-PLAN.md — BootSplash + LanguageSwitcher + LanguageConfirmDialog + SettingsModal Interface Language section (UI-02, UI-03)
 **UI hint**: yes
 
 ### Phase 3: RTL Layout Conversion
