@@ -49,6 +49,7 @@ export function LanguageConfirmDialog({
   targetLanguageName,
 }: LanguageConfirmDialogProps) {
   const t = useTranslations('settings.language');
+  const tLang = useTranslations('languageConfirm');
   const { isRecording } = useRecordingState();
   const [isPersisting, setIsPersisting] = useState(false);
 
@@ -81,6 +82,11 @@ export function LanguageConfirmDialog({
           {isRecording && (
             <p className="mt-2 text-small font-normal text-muted-foreground">
               {t('confirm.recordingBlocker')}
+            </p>
+          )}
+          {targetLocale === 'ar' && (
+            <p className="mt-2 text-sm font-normal text-muted-foreground italic">
+              {tLang('providerRepoint')}
             </p>
           )}
         </AlertDialogHeader>
