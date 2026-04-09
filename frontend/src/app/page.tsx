@@ -21,6 +21,8 @@ import { TranscriptRecovery } from '@/components/TranscriptRecovery';
 import { indexedDBService } from '@/services/indexedDBService';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from '@/providers/I18nProvider';
+import { WhisperDownloadGate } from '@/components/WhisperDownloadGate';
 
 export default function Home() {
   // Local page state (not moved to contexts)
@@ -61,6 +63,9 @@ export default function Home() {
   } = useTranscriptRecovery();
 
   const router = useRouter();
+  const locale = useLocale();
+  const isArabic = locale === 'ar';
+  const t = useTranslations('recording');
 
   useEffect(() => {
     // Track page view
@@ -232,21 +237,44 @@ export default function Home() {
               >
                 <div className="w-2/3 max-w-[750px] flex justify-center">
                   <div className="bg-white rounded-full shadow-lg flex items-center">
-                    <RecordingControls
-                      isRecording={recordingState.isRecording}
-                      onRecordingStop={(callApi = true) => handleRecordingStop(callApi)}
-                      onRecordingStart={handleRecordingStart}
-                      onTranscriptReceived={() => { }} // Not actually used by RecordingControls
-                      onStopInitiated={() => setIsStopping(true)}
-                      barHeights={barHeights}
-                      onTranscriptionError={(message) => {
-                        showModal('errorAlert', message);
-                      }}
-                      isRecordingDisabled={isRecordingDisabled}
-                      isParentProcessing={isProcessingStop}
-                      selectedDevices={selectedDevices}
-                      meetingName={meetingTitle}
-                    />
+                    {isArabic ? (
+                      <WhisperDownloadGate
+                        modelName="large-v3"
+                        onReady={() => toast.success(t('modelReady'))}
+                      >
+                        <RecordingControls
+                          isRecording={recordingState.isRecording}
+                          onRecordingStop={(callApi = true) => handleRecordingStop(callApi)}
+                          onRecordingStart={handleRecordingStart}
+                          onTranscriptReceived={() => { }}
+                          onStopInitiated={() => setIsStopping(true)}
+                          barHeights={barHeights}
+                          onTranscriptionError={(message) => {
+                            showModal('errorAlert', message);
+                          }}
+                          isRecordingDisabled={isRecordingDisabled}
+                          isParentProcessing={isProcessingStop}
+                          selectedDevices={selectedDevices}
+                          meetingName={meetingTitle}
+                        />
+                      </WhisperDownloadGate>
+                    ) : (
+                      <RecordingControls
+                        isRecording={recordingState.isRecording}
+                        onRecordingStop={(callApi = true) => handleRecordingStop(callApi)}
+                        onRecordingStart={handleRecordingStart}
+                        onTranscriptReceived={() => { }}
+                        onStopInitiated={() => setIsStopping(true)}
+                        barHeights={barHeights}
+                        onTranscriptionError={(message) => {
+                          showModal('errorAlert', message);
+                        }}
+                        isRecordingDisabled={isRecordingDisabled}
+                        isParentProcessing={isProcessingStop}
+                        selectedDevices={selectedDevices}
+                        meetingName={meetingTitle}
+                      />
+                    )}
                   </div>
                 </div>
               </div>
