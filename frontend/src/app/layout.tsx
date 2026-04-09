@@ -1,7 +1,7 @@
 'use client'
 
 import './globals.css'
-import { Source_Sans_3 } from 'next/font/google'
+import { Source_Sans_3, Tajawal } from 'next/font/google'
 import Sidebar from '@/components/Sidebar'
 import { SidebarProvider } from '@/components/Sidebar/SidebarProvider'
 import MainContent from '@/components/MainContent'
@@ -16,6 +16,14 @@ import { RecordingStateProvider } from '@/contexts/RecordingStateContext'
 import { OllamaDownloadProvider } from '@/contexts/OllamaDownloadContext'
 import { TranscriptProvider } from '@/contexts/TranscriptContext'
 import { ConfigProvider, useConfig } from '@/contexts/ConfigContext'
+import enMessages from '@/messages/en.json'
+import arMessages from '@/messages/ar.json'
+import { I18nProvider, type Locale } from '@/providers/I18nProvider'
+import { bootstrapLocale } from '@/lib/bootstrapLocale'
+import { getUserPreferences, setUserPreferences, type UserPreferences } from '@/services/preferencesService'
+import { BootSplash } from '@/components/BootSplash'
+
+const messages = { en: enMessages, ar: arMessages } as const
 import { OnboardingProvider } from '@/contexts/OnboardingContext'
 import { OnboardingFlow } from '@/components/onboarding'
 import { loadBetaFeatures } from '@/types/betaFeatures'
@@ -29,8 +37,16 @@ import { isAudioExtension, getAudioFormatsDisplayList } from '@/constants/audioF
 
 const sourceSans3 = Source_Sans_3({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '600'],
   variable: '--font-source-sans-3',
+  display: 'swap',
+})
+
+const tajawal = Tajawal({
+  subsets: ['arabic'],
+  weight: ['400', '500'],
+  variable: '--font-tajawal',
+  display: 'swap',
 })
 
 // Module-level component — stable reference across RootLayout re-renders.
@@ -71,6 +87,10 @@ export default function RootLayout({
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [onboardingCompleted, setOnboardingCompleted] = useState(false)
 
+  // Phase 2 locale bootstrap state
+  const [initialPreferences, setInitialPreferences] = useState<UserPreferences | null>(null)
+  const [uiLocale, setUiLocale] = useState<Locale>('en')
+
   // Import audio state
   const [showDropOverlay, setShowDropOverlay] = useState(false)
   const [showImportDialog, setShowImportDialog] = useState(false)
@@ -96,6 +116,38 @@ export default function RootLayout({
         setShowOnboarding(true)
         setOnboardingCompleted(false)
       })
+  }, [])
+
+  // Phase 2 locale bootstrap — D-09 (CONTEXT.md).
+  // Calls the pure bootstrapLocale helper and persists the result atomically.
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const prefs = await getUserPreferences()
+        const { uiLocale: resolved, persist } = bootstrapLocale(prefs, navigator.language)
+        if (persist !== null) {
+          await setUserPreferences(persist)
+        }
+        if (cancelled) return
+        setUiLocale(resolved)
+        setInitialPreferences({ ...prefs, ...(persist ?? {}), uiLocale: resolved, bootstrapped: true })
+      } catch (err) {
+        console.error('[Layout] Locale bootstrap failed:', err)
+        if (cancelled) return
+        // Fallback: render in English with a seed-only preferences object.
+        // The language row in Settings remains the recovery path (UI-SPEC error state).
+        toast.error("Couldn't load preferences. Starting in English — set your language in Settings.")
+        setUiLocale('en')
+        setInitialPreferences({
+          uiLocale: 'en',
+          summaryLanguage: 'en',
+          transcriptionLanguage: 'auto',
+          bootstrapped: false,
+        })
+      }
+    })()
+    return () => { cancelled = true }
   }, [])
 
   // Disable context menu in production
@@ -231,50 +283,55 @@ export default function RootLayout({
   }
 
   return (
-    <html lang="en">
-      <body className={`${sourceSans3.variable} font-sans antialiased`}>
-        <AnalyticsProvider>
-          <RecordingStateProvider>
-            <TranscriptProvider>
-              <ConfigProvider>
-                <OllamaDownloadProvider>
-                  <OnboardingProvider>
-                    <UpdateCheckProvider>
-                      <SidebarProvider>
-                        <TooltipProvider>
-                          <RecordingPostProcessingProvider>
-                            <ImportDialogProvider onOpen={handleOpenImportDialog}>
-                              {/* Download progress toast provider - listens for background downloads */}
-                              <DownloadProgressToastProvider />
+    <html lang={uiLocale} dir={uiLocale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
+      <body className={`${sourceSans3.variable} ${tajawal.variable} font-sans antialiased`}>
+        {initialPreferences ? (
+          <AnalyticsProvider>
+            <RecordingStateProvider>
+              <TranscriptProvider>
+                <ConfigProvider initialPreferences={initialPreferences}>
+                  <I18nProvider locale={uiLocale} messages={messages[uiLocale]}>
+                    <OllamaDownloadProvider>
+                      <OnboardingProvider>
+                        <UpdateCheckProvider>
+                          <SidebarProvider>
+                            <TooltipProvider>
+                              <RecordingPostProcessingProvider>
+                                <ImportDialogProvider onOpen={handleOpenImportDialog}>
+                                  {/* Download progress toast provider - listens for background downloads */}
+                                  <DownloadProgressToastProvider />
 
-                              {/* Show onboarding or main app */}
-                              {showOnboarding ? (
-                                <OnboardingFlow onComplete={handleOnboardingComplete} />
-                              ) : (
-                                <div className="flex">
-                                  <Sidebar />
-                                  <MainContent>{children}</MainContent>
-                                </div>
-                              )}
-                              {/* Import audio overlay and dialog */}
-                              <ImportDropOverlay visible={showDropOverlay} />
-                              <ConditionalImportDialog
-                                showImportDialog={showImportDialog}
-                                handleImportDialogClose={handleImportDialogClose}
-                                importFilePath={importFilePath}
-                              />
-                            </ImportDialogProvider>
-                          </RecordingPostProcessingProvider>
-                        </TooltipProvider>
-                      </SidebarProvider>
-                    </UpdateCheckProvider>
-                  </OnboardingProvider>
-
-                </OllamaDownloadProvider>
-              </ConfigProvider>
-            </TranscriptProvider>
-          </RecordingStateProvider>
-        </AnalyticsProvider>
+                                  {/* Show onboarding or main app */}
+                                  {showOnboarding ? (
+                                    <OnboardingFlow onComplete={handleOnboardingComplete} />
+                                  ) : (
+                                    <div className="flex">
+                                      <Sidebar />
+                                      <MainContent>{children}</MainContent>
+                                    </div>
+                                  )}
+                                  {/* Import audio overlay and dialog */}
+                                  <ImportDropOverlay visible={showDropOverlay} />
+                                  <ConditionalImportDialog
+                                    showImportDialog={showImportDialog}
+                                    handleImportDialogClose={handleImportDialogClose}
+                                    importFilePath={importFilePath}
+                                  />
+                                </ImportDialogProvider>
+                              </RecordingPostProcessingProvider>
+                            </TooltipProvider>
+                          </SidebarProvider>
+                        </UpdateCheckProvider>
+                      </OnboardingProvider>
+                    </OllamaDownloadProvider>
+                  </I18nProvider>
+                </ConfigProvider>
+              </TranscriptProvider>
+            </RecordingStateProvider>
+          </AnalyticsProvider>
+        ) : (
+          <BootSplash />
+        )}
 
         <Toaster position="bottom-center" richColors closeButton />
       </body>
