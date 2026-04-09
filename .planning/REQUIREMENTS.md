@@ -96,7 +96,6 @@ Which phases cover which requirements. Populated by the roadmapper.
 | PREFS-02 | Phase 1 | Pending |
 | PREFS-03 | Phase 1 | Pending |
 | PREFS-04 | Phase 1 | Pending |
-<<<<<<< HEAD
 | UI-01 | Phase 2 | Complete |
 | UI-02 | Phase 2 | Complete |
 | UI-03 | Phase 2 | Complete |
