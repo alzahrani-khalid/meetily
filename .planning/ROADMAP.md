@@ -103,14 +103,14 @@ Record a meeting, get an accurate transcript and a useful summary — in your ow
 
 ## Progress
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Preferences Foundation | 0/1 | Planned | — |
-| 2. i18n Framework & Locale Bootstrap | 0/5 | Planned | — |
-| 3. RTL Layout Conversion | 0/0 | Not started | — |
-| 4. Arabic Transcription Policy | 0/0 | Not started | — |
-| 5. Templates & Prompts (Bilingual Content) | 0/0 | Not started | — |
-| 6. Rust Strings, QA & Release Hardening | 0/0 | Not started | — |
+<!-- gsd:progress:start -->
+
+| Phase                               | Milestone | Plans Complete | Status      | Completed  |
+| ----------------------------------- | --------- | -------------- | ----------- | ---------- |
+| 01. Preferences Foundation          | TBD       | 1/1            | Complete    | 2026-04-09 |
+| 02. I18n Framework Locale Bootstrap | TBD       | 1/5            | In Progress | -          |
+
+<!-- gsd:progress:end -->
 
 ## Coverage
 
