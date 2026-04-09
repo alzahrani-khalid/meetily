@@ -1,0 +1,29 @@
+{
+  "boot": {
+    "appName": "Meetily",
+    "loading": "Preparing your meeting assistant\u2026"
+  },
+  "settings": {
+    "language": {
+      "sectionTitle": "Language",
+      "description": "Choose the language Meetily uses for its interface. Switching will reload the app.",
+      "option": {
+        "en": "English",
+        "ar": "العربية"
+      },
+      "currentLabel": "Current language",
+      "switchCta": "Switch to {lang}",
+      "confirm": {
+        "title": "Switch Meetily to {lang}?",
+        "body": "Meetily will reload to apply the new language. Any in-progress recording must be stopped first.",
+        "primaryCta": "Confirm & Reload",
+        "cancelCta": "Cancel",
+        "recordingBlocker": "Stop the current recording before switching language."
+      },
+      "error": {
+        "persistFailed": "Couldn't save language preference. Try again or restart Meetily.",
+        "bootstrapFailed": "Couldn't load preferences. Starting in English \u2014 set your language in Settings."
+      }
+    }
+  }
+}
