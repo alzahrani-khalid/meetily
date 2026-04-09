@@ -2,6 +2,7 @@ import { ModelConfig } from "@/components/ModelSettingsModal";
 import { PreferenceSettings } from "@/components/PreferenceSettings";
 import { DeviceSelection } from "@/components/DeviceSelection";
 import { LanguageSelection } from "@/components/LanguageSelection";
+import { LanguageSwitcher } from '@/components/settings/LanguageSwitcher';
 import { TranscriptSettings } from "@/components/TranscriptSettings";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
@@ -205,6 +206,9 @@ export function SettingsModals({
         </div>
       </div>
     )}
+
+    {/* Phase 2 — Interface Language (UI-02, UI-03, D-13) */}
+    <LanguageSwitcher />
 
     {/* Language Settings Modal */}
     {modals.languageSettings && (
