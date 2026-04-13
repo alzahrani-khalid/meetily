@@ -102,7 +102,7 @@ pub fn get_template(template_id: &str) -> Result<Template, String> {
     } else if let Some(bundled_content) = load_bundled_template(template_id) {
         debug!("Using bundled template for '{}'", template_id);
         bundled_content
-    } else if let Some(builtin_content) = defaults::get_builtin_template(template_id) {
+    } else if let Some(builtin_content) = defaults::get_builtin_template(template_id, "en") {
         debug!("Using built-in template for '{}'", template_id);
         builtin_content.to_string()
     } else {
