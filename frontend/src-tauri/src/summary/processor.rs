@@ -1,4 +1,5 @@
 use crate::summary::llm_client::{generate_summary, LLMProvider};
+use crate::summary::prompts;
 use crate::summary::templates;
 use once_cell::sync::Lazy;
 use regex::Regex;
@@ -145,6 +146,7 @@ pub fn extract_meeting_name_from_markdown(markdown: &str) -> Option<String> {
 /// * `text` - Full transcript text to summarize
 /// * `custom_prompt` - Optional user-provided context
 /// * `template_id` - Template identifier (e.g., "daily_standup", "standard_meeting")
+/// * `locale` - Locale code for prompts and templates (e.g., "en", "ar")
 /// * `token_threshold` - Token limit for single-pass processing (default 4000)
 /// * `ollama_endpoint` - Optional custom Ollama endpoint
 /// * `custom_openai_endpoint` - Optional custom OpenAI-compatible endpoint
@@ -164,6 +166,7 @@ pub async fn generate_meeting_summary(
     text: &str,
     custom_prompt: &str,
     template_id: &str,
+    locale: &str,
     token_threshold: usize,
     ollama_endpoint: Option<&str>,
     custom_openai_endpoint: Option<&str>,
@@ -212,8 +215,10 @@ pub async fn generate_meeting_summary(
         info!("Split transcript into {} chunks", num_chunks);
 
         let mut chunk_summaries = Vec::new();
-        let system_prompt_chunk = "You are an expert meeting summarizer.";
-        let user_prompt_template_chunk = "Provide a concise but comprehensive summary of the following transcript chunk. Capture all key points, decisions, action items, and mentioned individuals.\n\n<transcript_chunk>\n{}\n</transcript_chunk>";
+        let system_prompt_chunk = prompts::get_prompt("chunk_summarizer_system", locale)
+            .unwrap_or("You are an expert meeting summarizer.");
+        let user_prompt_template_chunk = prompts::get_prompt("chunk_summarizer_user", locale)
+            .unwrap_or("Provide a concise but comprehensive summary of the following transcript chunk. Capture all key points, decisions, action items, and mentioned individuals.\n\n<transcript_chunk>\n{transcript_chunk}\n</transcript_chunk>");
 
         for (i, chunk) in chunks.iter().enumerate() {
             // Check for cancellation before processing each chunk
@@ -225,7 +230,7 @@ pub async fn generate_meeting_summary(
             }
 
             info!("Processing chunk {}/{}", i + 1, num_chunks);
-            let user_prompt_chunk = user_prompt_template_chunk.replace("{}", chunk.as_str());
+            let user_prompt_chunk = user_prompt_template_chunk.replace("{transcript_chunk}", chunk.as_str());
 
             match generate_summary(
                 client,
@@ -278,10 +283,12 @@ pub async fn generate_meeting_summary(
                 chunk_summaries.len()
             );
             let combined_text = chunk_summaries.join("\n---\n");
-            let system_prompt_combine = "You are an expert at synthesizing meeting summaries.";
-            let user_prompt_combine_template = "The following are consecutive summaries of a meeting. Combine them into a single, coherent, and detailed narrative summary that retains all important details, organized logically.\n\n<summaries>\n{}\n</summaries>";
+            let system_prompt_combine = prompts::get_prompt("chunk_combiner_system", locale)
+                .unwrap_or("You are an expert at synthesizing meeting summaries.");
+            let user_prompt_combine_template = prompts::get_prompt("chunk_combiner_user", locale)
+                .unwrap_or("The following are consecutive summaries of a meeting. Combine them into a single, coherent, and detailed narrative summary that retains all important details, organized logically.\n\n<summaries>\n{summaries}\n</summaries>");
 
-            let user_prompt_combine = user_prompt_combine_template.replace("{}", &combined_text);
+            let user_prompt_combine = user_prompt_combine_template.replace("{summaries}", &combined_text);
             generate_summary(
                 client,
                 provider,
@@ -305,16 +312,16 @@ pub async fn generate_meeting_summary(
 
     info!("Generating final markdown report with template: {}", template_id);
 
-    // Load the template using the provided template_id
-    let template = templates::get_template(template_id, "en")
+    // Load the template using the provided template_id and locale
+    let template = templates::get_template(template_id, locale)
         .map_err(|e| format!("Failed to load template '{}': {}", template_id, e))?;
 
     // Generate markdown structure and section instructions using template methods
     let clean_template_markdown = template.to_markdown_structure();
     let section_instructions = template.to_section_instructions();
 
-    let final_system_prompt = format!(
-        r#"You are an expert meeting summarizer. Generate a final meeting report by filling in the provided Markdown template based on the source text.
+    let final_system_prompt_template = prompts::get_prompt("final_report_system", locale)
+        .unwrap_or(r#"You are an expert meeting summarizer. Generate a final meeting report by filling in the provided Markdown template based on the source text.
 
 **CRITICAL INSTRUCTIONS:**
 1. Only use information present in the source text; do not add or infer anything.
@@ -325,14 +332,15 @@ pub async fn generate_meeting_summary(
 6. If unsure about something, omit it.
 
 **SECTION-SPECIFIC INSTRUCTIONS:**
-{}
+{section_instructions}
 
 <template>
-{}
+{template_markdown}
 </template>
-"#,
-        section_instructions, clean_template_markdown
-    );
+"#);
+    let final_system_prompt = final_system_prompt_template
+        .replace("{section_instructions}", &section_instructions)
+        .replace("{template_markdown}", &clean_template_markdown);
 
     let mut final_user_prompt = format!(
         r#"
