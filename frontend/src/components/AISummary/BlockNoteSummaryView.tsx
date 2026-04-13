@@ -5,9 +5,11 @@ import dynamic from 'next/dynamic';
 import { Summary, SummaryDataResponse, SummaryFormat, BlockNoteBlock } from '@/types';
 import { AISummary } from './index';
 import { Block } from '@blocknote/core';
+import { ar } from '@blocknote/core/locales';
 import { useCreateBlockNote } from '@blocknote/react';
 import { BlockNoteView } from '@blocknote/shadcn';
 import "@blocknote/shadcn/style.css";
+import { getUserPreferences } from '@/services/preferencesService';
 
 // Dynamically import BlockNote Editor to avoid SSR issues
 const Editor = dynamic(() => import('../BlockNoteEditor/Editor'), { ssr: false });
@@ -79,10 +81,23 @@ export const BlockNoteSummaryView = forwardRef<BlockNoteSummaryViewRef, BlockNot
   const [currentBlocks, setCurrentBlocks] = useState<Block[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const isContentLoaded = useRef(false);
+  const [summaryLocale, setSummaryLocale] = useState<'en' | 'ar'>('en');
+
+  // Read summary language from preferences (independent from UI locale per SUMM-04)
+  useEffect(() => {
+    getUserPreferences().then(prefs => {
+      setSummaryLocale(prefs.summaryLanguage as 'en' | 'ar');
+    }).catch(() => {
+      // Default to 'en' on error
+    });
+  }, []);
+
+  const isArabicSummary = summaryLocale === 'ar';
 
   // Create BlockNote editor for markdown parsing
   const editor = useCreateBlockNote({
-    initialContent: undefined
+    initialContent: undefined,
+    ...(isArabicSummary ? { dictionary: ar } : {}),
   });
 
   // Parse markdown to blocks when format is markdown
@@ -228,6 +243,7 @@ export const BlockNoteSummaryView = forwardRef<BlockNoteSummaryViewRef, BlockNot
               handleEditorChange(blocks);
             }}
             editable={true}
+            locale={summaryLocale}
           />
         </div>
       </div>
@@ -240,16 +256,18 @@ export const BlockNoteSummaryView = forwardRef<BlockNoteSummaryViewRef, BlockNot
     return (
       <div className="flex flex-col w-full">
         <div className="w-full">
-          <BlockNoteView
-            editor={editor}
-            editable={true}
-            onChange={() => {
-              if (isContentLoaded.current) {
-                handleEditorChange(editor.document);
-              }
-            }}
-            theme="light"
-          />
+          <div dir={isArabicSummary ? "rtl" : "ltr"}>
+            <BlockNoteView
+              editor={editor}
+              editable={true}
+              onChange={() => {
+                if (isContentLoaded.current) {
+                  handleEditorChange(editor.document);
+                }
+              }}
+              theme="light"
+            />
+          </div>
         </div>
       </div>
     );

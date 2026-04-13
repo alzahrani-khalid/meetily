@@ -2,16 +2,17 @@
 
 import { useEffect } from "react";
 import { PartialBlock, Block } from "@blocknote/core";
+import { ar } from "@blocknote/core/locales";
 import "@blocknote/shadcn/style.css";
-import "@blocknote/core/fonts/inter.css";
 
 interface EditorProps {
   initialContent?: Block[];
   onChange?: (blocks: Block[]) => void;
   editable?: boolean;
+  locale?: 'en' | 'ar';
 }
 
-export default function Editor({ initialContent, onChange, editable = true }: EditorProps) {
+export default function Editor({ initialContent, onChange, editable = true, locale = 'en' }: EditorProps) {
   console.log('📝 EDITOR: Initializing BlockNote editor with blocks:', {
     hasContent: !!initialContent,
     blocksCount: initialContent?.length || 0,
@@ -22,8 +23,11 @@ export default function Editor({ initialContent, onChange, editable = true }: Ed
   const { useCreateBlockNote } = require("@blocknote/react");
   const { BlockNoteView } = require("@blocknote/shadcn");
 
+  const isArabic = locale === 'ar';
+
   const editor = useCreateBlockNote({
     initialContent: initialContent as PartialBlock[] | undefined,
+    ...(isArabic ? { dictionary: ar } : {}),
   });
 
   console.log('📝 EDITOR: BlockNote editor created successfully');
@@ -59,5 +63,9 @@ export default function Editor({ initialContent, onChange, editable = true }: Ed
     };
   }, [editor, onChange]);
 
-  return <BlockNoteView editor={editor} editable={editable} theme="light" />;
+  return (
+    <div dir={isArabic ? "rtl" : "ltr"}>
+      <BlockNoteView editor={editor} editable={editable} theme="light" />
+    </div>
+  );
 }
