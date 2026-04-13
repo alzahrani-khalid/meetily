@@ -1,0 +1,5 @@
+Provide a concise but comprehensive summary of the following transcript chunk in Arabic (MSA). Capture all key points, decisions, action items, and mentioned individuals. Write section headers and all content in Arabic. Use Arabic punctuation: use "،" instead of ",", use "؛" instead of ";", use "؟" instead of "?".
+
+<transcript_chunk>
+{transcript_chunk}
+</transcript_chunk>

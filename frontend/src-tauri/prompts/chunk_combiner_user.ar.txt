@@ -1,0 +1,5 @@
+The following are consecutive summaries of a meeting in Arabic. Combine them into a single, coherent, and detailed narrative summary in Arabic (MSA) that retains all important details, organized logically. Use Arabic punctuation: use "،" instead of ",", use "؛" instead of ";", use "؟" instead of "?".
+
+<summaries>
+{summaries}
+</summaries>

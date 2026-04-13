@@ -1,0 +1,5 @@
+The following are consecutive summaries of a meeting. Combine them into a single, coherent, and detailed narrative summary that retains all important details, organized logically.
+
+<summaries>
+{summaries}
+</summaries>

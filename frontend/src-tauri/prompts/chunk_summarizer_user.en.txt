@@ -1,0 +1,5 @@
+Provide a concise but comprehensive summary of the following transcript chunk. Capture all key points, decisions, action items, and mentioned individuals.
+
+<transcript_chunk>
+{transcript_chunk}
+</transcript_chunk>
