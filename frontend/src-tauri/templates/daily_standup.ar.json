@@ -1,0 +1,39 @@
+{
+  "name": "الاجتماع اليومي",
+  "description": "تحديثات يومية موجزة لفرق الهندسة والمنتجات.",
+  "sections": [
+    {
+      "title": "التاريخ",
+      "instruction": "YYYY-MM-DD",
+      "format": "string"
+    },
+    {
+      "title": "الحاضرون",
+      "instruction": "قائمة المشاركين الحاضرين",
+      "format": "list"
+    },
+    {
+      "title": "أمس",
+      "instruction": "ما أنجزته بالأمس (نقاط موجزة)",
+      "format": "list",
+      "example_item_format": "| **المسؤول** | **العمل المنجز** |\n| --- | --- |"
+    },
+    {
+      "title": "اليوم",
+      "instruction": "العمل المخطط لليوم (نقاط موجزة)",
+      "format": "list",
+      "example_item_format": "| **المسؤول** | **العمل المخطط** |\n| --- | --- |"
+    },
+    {
+      "title": "العوائق",
+      "instruction": "أي عوائق والمسؤول عنها إن عُرف",
+      "format": "list",
+      "item_format": "| **المسؤول** | **العائق** | الأثر |\n| --- | --- | --- |"
+    },
+    {
+      "title": "ملاحظات",
+      "instruction": "ملاحظات سريعة أو إعلانات اختيارية",
+      "format": "paragraph"
+    }
+  ]
+}
