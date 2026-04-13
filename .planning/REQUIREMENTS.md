@@ -27,7 +27,7 @@ Requirements for the Arabic bilingual milestone. Each maps to exactly one roadma
 
 ### SUMM (Arabic Summaries)
 
-- [ ] **SUMM-01**: User can request a meeting summary in Arabic regardless of UI locale (summary language independent from UI language, per §2)
+- [x] **SUMM-01**: User can request a meeting summary in Arabic regardless of UI locale (summary language independent from UI language, per §2)
 - [x] **SUMM-02**: User can select from all 6 meeting templates (daily_standup, standard_meeting, project_sync, psychatric_session, retrospective, sales_marketing_client_call) available in both English and Arabic
 - [x] **SUMM-03**: User receives Arabic summaries with native MSA phrasing and proper Arabic punctuation (`،` `؛` `؟`) — prompts authored by a native speaker, not machine-translated
 - [ ] **SUMM-04**: User can view an Arabic summary in the BlockNote editor — editable if the §7 spike confirms RTL support, read-only rendered markdown fallback if the spike finds blockers (§12.3 decision)
@@ -111,7 +111,7 @@ Which phases cover which requirements. Populated by the roadmapper.
 | TPL-02 | Phase 5 | Complete |
 | TPL-03 | Phase 5 | Complete |
 | TPL-04 | Phase 5 | Complete |
-| SUMM-01 | Phase 5 | Pending |
+| SUMM-01 | Phase 5 | Complete |
 | SUMM-02 | Phase 5 | Complete |
 | SUMM-03 | Phase 5 | Complete |
 | SUMM-04 | Phase 5 | Pending |
