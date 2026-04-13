@@ -45,7 +45,7 @@ pub async fn api_list_templates<R: Runtime>(
 ) -> Result<Vec<TemplateInfo>, String> {
     info!("api_list_templates called");
 
-    let templates = templates::list_templates();
+    let templates = templates::list_templates("en");
 
     let template_infos: Vec<TemplateInfo> = templates
         .into_iter()
@@ -75,7 +75,7 @@ pub async fn api_get_template_details<R: Runtime>(
 ) -> Result<TemplateDetails, String> {
     info!("api_get_template_details called for template_id: {}", template_id);
 
-    let template = templates::get_template(&template_id)?;
+    let template = templates::get_template(&template_id, "en")?;
 
     let section_titles: Vec<String> = template
         .sections

@@ -306,7 +306,7 @@ pub async fn generate_meeting_summary(
     info!("Generating final markdown report with template: {}", template_id);
 
     // Load the template using the provided template_id
-    let template = templates::get_template(template_id)
+    let template = templates::get_template(template_id, "en")
         .map_err(|e| format!("Failed to load template '{}': {}", template_id, e))?;
 
     // Generate markdown structure and section instructions using template methods

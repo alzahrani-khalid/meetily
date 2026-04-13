@@ -54,24 +54,27 @@ mod tests {
 
     #[test]
     fn test_module_integration() {
-        // Test that we can load all built-in templates
+        // Test that we can load all built-in templates in both locales
         let ids = list_template_ids();
         assert!(!ids.is_empty());
 
-        for id in ids {
-            let result = get_template(&id);
-            assert!(
-                result.is_ok(),
-                "Failed to load template '{}': {:?}",
-                id,
-                result.err()
-            );
+        for id in &ids {
+            for locale in &["en", "ar"] {
+                let result = get_template(id, locale);
+                assert!(
+                    result.is_ok(),
+                    "Failed to load template '{}' locale '{}': {:?}",
+                    id,
+                    locale,
+                    result.err()
+                );
+            }
         }
     }
 
     #[test]
     fn test_template_metadata() {
-        let templates = list_templates();
+        let templates = list_templates("en");
         assert!(!templates.is_empty());
 
         for (id, name, description) in templates {

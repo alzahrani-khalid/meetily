@@ -31,20 +31,31 @@ fn get_custom_templates_dir() -> Option<PathBuf> {
 
 /// Load a template from the bundled resources directory
 ///
+/// Tries locale-specific file first (`{id}.{locale}.json`), then base file (`{id}.json`).
+///
 /// # Arguments
 /// * `template_id` - Template identifier (without .json extension)
+/// * `locale` - Locale code (e.g., "en", "ar")
 ///
 /// # Returns
 /// The template JSON content if found, None otherwise
-fn load_bundled_template(template_id: &str) -> Option<String> {
+fn load_bundled_template(template_id: &str, locale: &str) -> Option<String> {
     let bundled_dir = BUNDLED_TEMPLATES_DIR.read().ok()?.clone()?;
-    let template_path = bundled_dir.join(format!("{}.json", template_id));
 
-    debug!("Checking for bundled template at: {:?}", template_path);
+    // Try locale-specific file first
+    let locale_path = bundled_dir.join(format!("{}.{}.json", template_id, locale));
+    debug!("Checking for bundled template at: {:?}", locale_path);
+    if let Ok(content) = std::fs::read_to_string(&locale_path) {
+        info!("Loaded bundled template '{}' locale '{}' from {:?}", template_id, locale, locale_path);
+        return Some(content);
+    }
 
-    match std::fs::read_to_string(&template_path) {
+    // Fall back to base file
+    let base_path = bundled_dir.join(format!("{}.json", template_id));
+    debug!("Checking for bundled template at: {:?}", base_path);
+    match std::fs::read_to_string(&base_path) {
         Ok(content) => {
-            info!("Loaded bundled template '{}' from {:?}", template_id, template_path);
+            info!("Loaded bundled template '{}' (base) from {:?}", template_id, base_path);
             Some(content)
         }
         Err(e) => {
@@ -56,20 +67,31 @@ fn load_bundled_template(template_id: &str) -> Option<String> {
 
 /// Load a template from the user's custom templates directory
 ///
+/// Tries locale-specific file first (`{id}.{locale}.json`), then base file (`{id}.json`).
+///
 /// # Arguments
 /// * `template_id` - Template identifier (without .json extension)
+/// * `locale` - Locale code (e.g., "en", "ar")
 ///
 /// # Returns
 /// The template JSON content if found, None otherwise
-fn load_custom_template(template_id: &str) -> Option<String> {
+fn load_custom_template(template_id: &str, locale: &str) -> Option<String> {
     let custom_dir = get_custom_templates_dir()?;
-    let template_path = custom_dir.join(format!("{}.json", template_id));
 
-    debug!("Checking for custom template at: {:?}", template_path);
+    // Try locale-specific file first
+    let locale_path = custom_dir.join(format!("{}.{}.json", template_id, locale));
+    debug!("Checking for custom template at: {:?}", locale_path);
+    if let Ok(content) = std::fs::read_to_string(&locale_path) {
+        info!("Loaded custom template '{}' locale '{}' from {:?}", template_id, locale, locale_path);
+        return Some(content);
+    }
 
-    match std::fs::read_to_string(&template_path) {
+    // Fall back to base file
+    let base_path = custom_dir.join(format!("{}.json", template_id));
+    debug!("Checking for custom template at: {:?}", base_path);
+    match std::fs::read_to_string(&base_path) {
         Ok(content) => {
-            info!("Loaded custom template '{}' from {:?}", template_id, template_path);
+            info!("Loaded custom template '{}' (base) from {:?}", template_id, base_path);
             Some(content)
         }
         Err(e) => {
@@ -79,31 +101,33 @@ fn load_custom_template(template_id: &str) -> Option<String> {
     }
 }
 
-/// Load and parse a template by identifier
+/// Load and parse a template by identifier and locale
 ///
-/// This function implements a fallback strategy:
-/// 1. Check user's custom templates directory
-/// 2. Check bundled resources directory (app templates)
-/// 3. Fall back to built-in embedded templates
+/// This function implements a locale-aware fallback strategy:
+/// At each tier, tries `{id}.{locale}.json` before `{id}.json`:
+/// 1. Check user's custom templates directory (locale-specific, then base)
+/// 2. Check bundled resources directory (locale-specific, then base)
+/// 3. Fall back to built-in embedded templates (locale-aware with English fallback)
 /// 4. Return error if not found in any location
 ///
 /// # Arguments
 /// * `template_id` - Template identifier (e.g., "daily_standup", "standard_meeting")
+/// * `locale` - Locale code (e.g., "en", "ar"). Unknown locales fall back to English.
 ///
 /// # Returns
 /// Parsed and validated Template struct
-pub fn get_template(template_id: &str) -> Result<Template, String> {
-    info!("Loading template: {}", template_id);
+pub fn get_template(template_id: &str, locale: &str) -> Result<Template, String> {
+    info!("Loading template: {} (locale: {})", template_id, locale);
 
     // Try custom template first, then bundled, then built-in
-    let json_content = if let Some(custom_content) = load_custom_template(template_id) {
-        debug!("Using custom template for '{}'", template_id);
+    let json_content = if let Some(custom_content) = load_custom_template(template_id, locale) {
+        debug!("Using custom template for '{}' locale '{}'", template_id, locale);
         custom_content
-    } else if let Some(bundled_content) = load_bundled_template(template_id) {
-        debug!("Using bundled template for '{}'", template_id);
+    } else if let Some(bundled_content) = load_bundled_template(template_id, locale) {
+        debug!("Using bundled template for '{}' locale '{}'", template_id, locale);
         bundled_content
-    } else if let Some(builtin_content) = defaults::get_builtin_template(template_id, "en") {
-        debug!("Using built-in template for '{}'", template_id);
+    } else if let Some(builtin_content) = defaults::get_builtin_template(template_id, locale) {
+        debug!("Using built-in template for '{}' locale '{}'", template_id, locale);
         builtin_content.to_string()
     } else {
         return Err(format!(
@@ -133,9 +157,27 @@ pub fn validate_and_parse_template(json_content: &str) -> Result<Template, Strin
     Ok(template)
 }
 
+/// Extract the base template ID from a filename, stripping locale suffixes
+///
+/// Examples:
+/// - "daily_standup.json" -> "daily_standup"
+/// - "daily_standup.ar.json" -> "daily_standup"
+/// - "project_sync.en.json" -> "project_sync"
+fn extract_base_template_id(filename: &str) -> Option<String> {
+    let name = filename.strip_suffix(".json")?;
+    // Check if there's a locale suffix (e.g., ".ar", ".en")
+    if let Some(base) = name.strip_suffix(".ar")
+        .or_else(|| name.strip_suffix(".en"))
+    {
+        Some(base.to_string())
+    } else {
+        Some(name.to_string())
+    }
+}
+
 /// List all available template identifiers
 ///
-/// Returns a combined list of:
+/// Returns a combined list of unique base template IDs (no locale duplicates):
 /// - Built-in template IDs
 /// - Bundled template IDs (from app resources)
 /// - Custom template IDs (from user's data directory)
@@ -154,9 +196,10 @@ pub fn list_template_ids() -> Vec<String> {
                         for entry in entries.flatten() {
                             if let Some(filename) = entry.file_name().to_str() {
                                 if filename.ends_with(".json") {
-                                    let id = filename.trim_end_matches(".json").to_string();
-                                    if !ids.contains(&id) {
-                                        ids.push(id);
+                                    if let Some(id) = extract_base_template_id(filename) {
+                                        if !ids.contains(&id) {
+                                            ids.push(id);
+                                        }
                                     }
                                 }
                             }
@@ -178,9 +221,10 @@ pub fn list_template_ids() -> Vec<String> {
                     for entry in entries.flatten() {
                         if let Some(filename) = entry.file_name().to_str() {
                             if filename.ends_with(".json") {
-                                let id = filename.trim_end_matches(".json").to_string();
-                                if !ids.contains(&id) {
-                                    ids.push(id);
+                                if let Some(id) = extract_base_template_id(filename) {
+                                    if !ids.contains(&id) {
+                                        ids.push(id);
+                                    }
                                 }
                             }
                         }
@@ -197,14 +241,14 @@ pub fn list_template_ids() -> Vec<String> {
     ids
 }
 
-/// List all available templates with their metadata
+/// List all available templates with their metadata for a given locale
 ///
 /// Returns a list of (id, name, description) tuples
-pub fn list_templates() -> Vec<(String, String, String)> {
+pub fn list_templates(locale: &str) -> Vec<(String, String, String)> {
     let mut templates = Vec::new();
 
     for id in list_template_ids() {
-        match get_template(&id) {
+        match get_template(&id, locale) {
             Ok(template) => {
                 templates.push((id, template.name, template.description));
             }
@@ -223,7 +267,7 @@ mod tests {
 
     #[test]
     fn test_get_builtin_template() {
-        let template = get_template("daily_standup");
+        let template = get_template("daily_standup", "en");
         assert!(template.is_ok());
 
         let template = template.unwrap();
@@ -232,21 +276,53 @@ mod tests {
     }
 
     #[test]
+    fn test_get_builtin_template_arabic() {
+        let template = get_template("daily_standup", "ar");
+        assert!(template.is_ok());
+
+        let template = template.unwrap();
+        assert_eq!(template.name, "الاجتماع اليومي");
+        assert!(!template.sections.is_empty());
+    }
+
+    #[test]
     fn test_get_nonexistent_template() {
-        let result = get_template("nonexistent_template");
+        let result = get_template("nonexistent_template", "en");
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_locale_fallback() {
+        let template = get_template("daily_standup", "fr");
+        assert!(template.is_ok());
+
+        let template = template.unwrap();
+        assert_eq!(template.name, "Daily Standup", "Unknown locale should fall back to English");
     }
 
     #[test]
     fn test_list_template_ids() {
         let ids = list_template_ids();
+        assert_eq!(ids.len(), 6, "Should have exactly 6 template IDs, got: {:?}", ids);
         assert!(ids.contains(&"daily_standup".to_string()));
         assert!(ids.contains(&"standard_meeting".to_string()));
+        assert!(ids.contains(&"project_sync".to_string()));
+        assert!(ids.contains(&"psychatric_session".to_string()));
+        assert!(ids.contains(&"retrospective".to_string()));
+        assert!(ids.contains(&"sales_marketing_client_call".to_string()));
     }
 
     #[test]
     fn test_validate_invalid_json() {
         let result = validate_and_parse_template("invalid json");
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_extract_base_template_id() {
+        assert_eq!(extract_base_template_id("daily_standup.json"), Some("daily_standup".to_string()));
+        assert_eq!(extract_base_template_id("daily_standup.ar.json"), Some("daily_standup".to_string()));
+        assert_eq!(extract_base_template_id("daily_standup.en.json"), Some("daily_standup".to_string()));
+        assert_eq!(extract_base_template_id("not_json"), None);
     }
 }
