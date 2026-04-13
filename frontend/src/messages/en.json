@@ -37,5 +37,12 @@
   },
   "languageConfirm": {
     "providerRepoint": "The transcription provider will also be switched to Whisper large-v3 for higher Arabic accuracy"
+  },
+  "summary": {
+    "templateLabel": "Meeting template",
+    "templateEmpty": "No templates available",
+    "languageMismatch": "Summary language differs from UI language. Summary will be generated in {language}.",
+    "promptLoadError": "Could not load summary prompt. Using default English prompt.",
+    "templateLoadError": "Could not load template. Using default English template."
   }
 }
