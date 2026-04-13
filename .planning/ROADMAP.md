@@ -125,7 +125,7 @@ Plans:
 | 02. I18n Framework Locale Bootstrap     | TBD       | 5/5            | Complete    | 2026-04-09 |
 | 03. Rtl Layout Conversion               | TBD       | 4/4            | Complete    | 2026-04-13 |
 | 04. Arabic Transcription Policy         | TBD       | 2/2            | Complete    | 2026-04-13 |
-| 05. Templates Prompts Bilingual Content | TBD       | 3/4            | In Progress | -          |
+| 05. Templates Prompts Bilingual Content | TBD       | 4/4            | Complete    | 2026-04-13 |
 
 <!-- gsd:progress:end -->
 
