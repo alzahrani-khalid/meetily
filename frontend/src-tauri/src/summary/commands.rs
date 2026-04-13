@@ -2,6 +2,7 @@ use crate::database::repositories::{
     meeting::MeetingsRepository, summary::SummaryProcessesRepository,
     transcript_chunk::TranscriptChunksRepository,
 };
+use crate::preferences;
 use crate::state::AppState;
 use crate::summary::service::SummaryService;
 use log::{error as log_error, info as log_info, warn as log_warn};
@@ -215,6 +216,9 @@ pub async fn api_process_transcript<R: Runtime>(
 
     log_info!("✓ Transcript chunks saved for meeting_id: {}", &m_id);
 
+    // Read summary_language from preferences (independent from UI locale per SUMM-01)
+    let summary_locale = preferences::read().summary_language;
+
     // Spawn background task for actual processing
     let meeting_id_clone = m_id.clone();
     tauri::async_runtime::spawn(async move {
@@ -227,6 +231,7 @@ pub async fn api_process_transcript<R: Runtime>(
             model_name,
             final_prompt,
             final_template_id,
+            summary_locale,
         )
         .await;
     });
