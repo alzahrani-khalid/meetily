@@ -29,7 +29,7 @@ Requirements for the Arabic bilingual milestone. Each maps to exactly one roadma
 
 - [ ] **SUMM-01**: User can request a meeting summary in Arabic regardless of UI locale (summary language independent from UI language, per §2)
 - [ ] **SUMM-02**: User can select from all 6 meeting templates (daily_standup, standard_meeting, project_sync, psychatric_session, retrospective, sales_marketing_client_call) available in both English and Arabic
-- [ ] **SUMM-03**: User receives Arabic summaries with native MSA phrasing and proper Arabic punctuation (`،` `؛` `؟`) — prompts authored by a native speaker, not machine-translated
+- [x] **SUMM-03**: User receives Arabic summaries with native MSA phrasing and proper Arabic punctuation (`،` `؛` `؟`) — prompts authored by a native speaker, not machine-translated
 - [ ] **SUMM-04**: User can view an Arabic summary in the BlockNote editor — editable if the §7 spike confirms RTL support, read-only rendered markdown fallback if the spike finds blockers (§12.3 decision)
 
 ### PREFS (Preferences Infrastructure)
@@ -43,8 +43,8 @@ Requirements for the Arabic bilingual milestone. Each maps to exactly one roadma
 
 - [ ] **TPL-01**: Meeting template loader resolves `{id}.{locale}.json` first, falls back to `{id}.json`, at every tier of the existing custom → bundled → builtin chain in `frontend/src-tauri/src/summary/templates/loader.rs`
 - [ ] **TPL-02**: All 6 meeting templates are embedded in `defaults.rs`, fixing the pre-existing 2/6 embed gap (currently only `DAILY_STANDUP` and `STANDARD_MEETING` are embedded)
-- [ ] **TPL-03**: 5 LLM prompts externalized from `frontend/src-tauri/src/summary/processor.rs:215, 216, 281, 282, 316` to `frontend/src-tauri/prompts/*.txt` with a new `summary/prompts/` loader module mirroring the template resolution signature
-- [ ] **TPL-04**: `processor.rs` call sites read prompts via `prompts::get_prompt(id, locale)` instead of inline strings; all 10 prompt files (5 EN + 5 AR) embedded via `include_str!` in a `prompts/defaults.rs` so offline builds work
+- [x] **TPL-03**: 5 LLM prompts externalized from `frontend/src-tauri/src/summary/processor.rs:215, 216, 281, 282, 316` to `frontend/src-tauri/prompts/*.txt` with a new `summary/prompts/` loader module mirroring the template resolution signature
+- [x] **TPL-04**: `processor.rs` call sites read prompts via `prompts::get_prompt(id, locale)` instead of inline strings; all 10 prompt files (5 EN + 5 AR) embedded via `include_str!` in a `prompts/defaults.rs` so offline builds work
 
 ### QA (Quality Assurance)
 
@@ -109,11 +109,11 @@ Which phases cover which requirements. Populated by the roadmapper.
 | TRANS-04 | Phase 4 | Pending |
 | TPL-01 | Phase 5 | Pending |
 | TPL-02 | Phase 5 | Pending |
-| TPL-03 | Phase 5 | Pending |
-| TPL-04 | Phase 5 | Pending |
+| TPL-03 | Phase 5 | Complete |
+| TPL-04 | Phase 5 | Complete |
 | SUMM-01 | Phase 5 | Pending |
 | SUMM-02 | Phase 5 | Pending |
-| SUMM-03 | Phase 5 | Pending |
+| SUMM-03 | Phase 5 | Complete |
 | SUMM-04 | Phase 5 | Pending |
 | QA-01 | Phase 6 | Pending |
 | QA-02 | Phase 6 | Pending |
