@@ -17,7 +17,7 @@ Record a meeting, get an accurate transcript and a useful summary — in your ow
 - [ ] **Phase 3: RTL Layout Conversion** — BlockNote spike, ESLint guardrail, hotspot-first conversion of 286 directional hits across 65 files
 - [ ] **Phase 4: Arabic Transcription Policy** — Whisper `large-v3`-only Arabic path, Parakeet ban enforcement at UI + onboarding, non-blocking large-v3 download
 - [ ] **Phase 5: Templates & Prompts (Bilingual Content)** — Locale-suffix loader, `defaults.rs` 2/6 embed fix, externalized prompts, 6 AR templates + 5 AR prompts authored in MSA
-- [ ] **Phase 6: Rust Strings, QA & Release Hardening** — Tray/notification hydration, automated regression tests, manual RTL pass, Arabic transcription + summary quality spot-checks
+- [x] **Phase 6: Rust Strings, QA & Release Hardening** — Tray/notification hydration, automated regression tests, manual RTL pass, Arabic transcription + summary quality spot-checks
 
 ## Phase Details
 
@@ -130,6 +130,7 @@ Plans:
 | 03. Rtl Layout Conversion               | TBD       | 4/4            | Complete    | 2026-04-13 |
 | 04. Arabic Transcription Policy         | TBD       | 2/2            | Complete    | 2026-04-13 |
 | 05. Templates Prompts Bilingual Content | TBD       | 4/4            | Complete    | 2026-04-13 |
+| 06. Rust Strings QA Release Hardening   | TBD       | 3/3            | Complete    | 2026-04-15 |
 
 <!-- gsd:progress:end -->
 
