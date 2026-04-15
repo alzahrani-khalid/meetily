@@ -75,4 +75,42 @@ mod tests {
             assert!(get_prompt(id, "ar").is_ok(), "AR prompt '{}' should resolve", id);
         }
     }
+
+    // =================================================================
+    // QA-03: 3-case fallback matrix for get_prompt()
+    // =================================================================
+
+    #[test]
+    fn qa03_ar_locale_returns_ar_content() {
+        // Case 1: AR file present -> AR returned
+        let result = get_prompt("chunk_summarizer_system", "ar");
+        assert!(result.is_ok(), "AR prompt must resolve");
+        assert!(
+            result.unwrap().contains('\u{060C}'),
+            "AR content must contain Arabic comma"
+        );
+    }
+
+    #[test]
+    fn qa03_unknown_locale_falls_back_to_en() {
+        // Case 2: Unknown locale (no "fr" file) + EN present -> EN fallback
+        let result = get_prompt("chunk_summarizer_system", "fr");
+        assert!(result.is_ok(), "fallback to EN must succeed");
+        let content = result.unwrap();
+        assert!(
+            !content.contains('\u{060C}'),
+            "fallback must return EN, not AR"
+        );
+    }
+
+    #[test]
+    fn qa03_nonexistent_id_returns_error() {
+        // Case 3: Both missing -> error
+        let result = get_prompt("qa03_nonexistent_prompt", "ar");
+        assert!(result.is_err(), "nonexistent prompt must error");
+        assert!(
+            result.unwrap_err().contains("not found"),
+            "error must contain 'not found'"
+        );
+    }
 }

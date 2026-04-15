@@ -354,3 +354,179 @@ async fn concurrent_setters_serialize() {
         "final state is the pre-call default — neither write landed"
     );
 }
+
+// =============================================================================
+// T6 — QA-01: Startup with Arabic locale hydrates correctly
+//      (6-02, binds QA-01)
+// =============================================================================
+
+#[tokio::test]
+async fn qa01_startup_ar_locale_hydrates_correctly() {
+    let _guard = lock_prefs_cache().await;
+    let pool = test_pool_with_migration().await;
+
+    // Seed Arabic locale in DB before hydration — simulates returning user
+    sqlx::query("UPDATE user_preferences SET ui_locale = 'ar' WHERE id = '1'")
+        .execute(&pool)
+        .await
+        .expect("seed ar locale");
+
+    hydrate_from_db(&pool).await.expect("hydrate");
+    let prefs = read();
+    assert_eq!(prefs.ui_locale, "ar", "startup hydration must reflect seeded ar locale");
+}
+
+// =============================================================================
+// T7 — QA-01: Runtime locale switch visible in cache
+//      (6-02, binds QA-01)
+// =============================================================================
+
+#[tokio::test]
+async fn qa01_runtime_locale_switch_visible_in_cache() {
+    let _guard = lock_prefs_cache().await;
+    let pool = test_pool_with_migration().await;
+    hydrate_from_db(&pool).await.expect("hydrate");
+
+    // Default is "en", switch to "ar"
+    let patch = UserPreferencesPatch {
+        ui_locale: Some("ar".to_string()),
+        ..Default::default()
+    };
+    let merged = repository::apply_patch_atomic(&pool, patch)
+        .await
+        .expect("apply_patch_atomic");
+
+    // Mirror commands.rs cache update ordering
+    *PREFS_CACHE.write().expect("poisoned") = merged.clone();
+    let prefs = read();
+    assert_eq!(prefs.ui_locale, "ar", "runtime switch must be visible via read()");
+}
+
+// =============================================================================
+// T8 — QA-01: Concurrent locale setters produce no partial state
+//      (6-02, binds QA-01)
+// =============================================================================
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn qa01_concurrent_locale_setters_no_partial_state() {
+    let _guard = lock_prefs_cache().await;
+    let pool = test_pool_with_migration().await;
+    hydrate_from_db(&pool).await.expect("hydrate");
+
+    // Build two futures before any .await (Anti-Sampling Rule #3)
+    let pool_a = pool.clone();
+    let pool_b = pool.clone();
+    let fut_a = async move {
+        let patch = UserPreferencesPatch {
+            ui_locale: Some("ar".to_string()),
+            ..Default::default()
+        };
+        repository::apply_patch_atomic(&pool_a, patch).await
+    };
+    let fut_b = async move {
+        let patch = UserPreferencesPatch {
+            ui_locale: Some("en".to_string()),
+            ..Default::default()
+        };
+        repository::apply_patch_atomic(&pool_b, patch).await
+    };
+
+    let joined = tokio::time::timeout(
+        std::time::Duration::from_secs(2),
+        async { tokio::try_join!(fut_a, fut_b) },
+    )
+    .await
+    .expect("concurrent locale setters deadlocked (>2s)");
+
+    let (_res_a, _res_b) = joined.expect("one or both setters errored");
+
+    // Final DB state must be one of the two inputs, never a hybrid
+    let row: (String,) =
+        sqlx::query_as("SELECT ui_locale FROM user_preferences WHERE id = '1'")
+            .fetch_one(&pool)
+            .await
+            .expect("fetch");
+    assert!(
+        row.0 == "ar" || row.0 == "en",
+        "final state must be ar or en, got: {}",
+        row.0
+    );
+}
+
+// =============================================================================
+// T9 — QA-02: en->ar switch auto-repoints parakeet provider
+//      (6-02, binds QA-02)
+// =============================================================================
+
+#[tokio::test]
+async fn qa02_en_to_ar_switch_repoints_parakeet() {
+    let _guard = lock_prefs_cache().await;
+    let pool = test_pool_with_migration().await;
+    hydrate_from_db(&pool).await.expect("hydrate");
+
+    // Seed parakeet provider while locale is still "en"
+    sqlx::query(
+        "UPDATE transcript_settings SET provider = 'parakeet', model = 'parakeet-tdt-0.6b' WHERE id = '1'",
+    )
+    .execute(&pool)
+    .await
+    .expect("seed parakeet");
+
+    // Switch locale to "ar" — should auto-repoint
+    let patch = UserPreferencesPatch {
+        ui_locale: Some("ar".to_string()),
+        ..Default::default()
+    };
+    let merged = repository::apply_patch_atomic(&pool, patch)
+        .await
+        .expect("should succeed with auto-repoint");
+
+    *PREFS_CACHE.write().expect("poisoned") = merged.clone();
+
+    // Assert variant match (Anti-Sampling Rule #5)
+    assert_eq!(merged.ui_locale, "ar");
+
+    // Provider must NOT be parakeet after auto-repoint
+    let row: (String,) =
+        sqlx::query_as("SELECT provider FROM transcript_settings WHERE id = '1'")
+            .fetch_one(&pool)
+            .await
+            .expect("fetch");
+    assert_ne!(row.0, "parakeet", "parakeet must be auto-repointed on ar switch");
+}
+
+// =============================================================================
+// T10 — QA-02: Direct parakeet+ar patch rejected
+//       (6-02, binds QA-02)
+// =============================================================================
+
+#[tokio::test]
+async fn qa02_direct_parakeet_ar_patch_rejected() {
+    let _guard = lock_prefs_cache().await;
+    let pool = test_pool_with_migration().await;
+    hydrate_from_db(&pool).await.expect("hydrate");
+
+    // Set locale to ar first
+    let setup = UserPreferencesPatch {
+        ui_locale: Some("ar".to_string()),
+        ..Default::default()
+    };
+    let merged = repository::apply_patch_atomic(&pool, setup)
+        .await
+        .expect("setup");
+    *PREFS_CACHE.write().expect("poisoned") = merged;
+
+    // Now try to set provider to parakeet while ar
+    let patch = UserPreferencesPatch {
+        provider: Some("parakeet".to_string()),
+        ..Default::default()
+    };
+    let result = repository::apply_patch_atomic(&pool, patch).await;
+
+    // VARIANT MATCH (Anti-Sampling Rule #5) — NOT generic is_err()
+    assert!(
+        matches!(result, Err(PreferencesError::InvalidCombination { .. })),
+        "parakeet + ar must be rejected as InvalidCombination, got: {:?}",
+        result
+    );
+}
