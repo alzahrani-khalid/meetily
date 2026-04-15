@@ -112,7 +112,11 @@ Plans:
   3. Automated regression suite covers: preference desync (startup + runtime + concurrent), Parakeet-ban enforcement (onboarding never downloads, settings never renders, API rejects), and template/prompt fallback (AR present → AR, AR missing → EN, both missing → error)
   4. User records an MSA Arabic audio sample and sees ~85-88% transcription accuracy with Whisper `large-v3`
   5. User generates an Arabic summary against both Claude and Ollama providers using an Arabic template + Arabic transcript + Arabic prompt and receives fully Arabic, RTL-formatted output from both
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 06-01-PLAN.md — Tray + notification bilingual string constants + locale-changed event wiring (UI-07)
+- [ ] 06-02-PLAN.md — Automated regression tests for preference desync, Parakeet ban, template/prompt fallback (QA-01, QA-02, QA-03)
+- [ ] 06-03-PLAN.md — Manual QA checklist + human verification checkpoint (QA-04, QA-05, QA-06)
 **UI hint**: yes
 
 ## Progress
