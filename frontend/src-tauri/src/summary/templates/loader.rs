@@ -325,4 +325,37 @@ mod tests {
         assert_eq!(extract_base_template_id("daily_standup.en.json"), Some("daily_standup".to_string()));
         assert_eq!(extract_base_template_id("not_json"), None);
     }
+
+    // =================================================================
+    // QA-03: 3-case fallback matrix for get_template()
+    // =================================================================
+
+    #[test]
+    fn qa03_ar_locale_returns_ar_template() {
+        // Case 1: AR file present -> AR returned
+        let result = get_template("daily_standup", "ar");
+        assert!(result.is_ok(), "AR template must resolve");
+        let template = result.unwrap();
+        // Verify Arabic content by checking template name contains Arabic Unicode range
+        let has_arabic = template.name.chars().any(|c| c >= '\u{0600}' && c <= '\u{06FF}');
+        assert!(has_arabic, "AR template name must contain Arabic characters");
+    }
+
+    #[test]
+    fn qa03_unknown_locale_falls_back_to_en() {
+        // Case 2: Unknown locale (no "fr" file) + EN present -> EN fallback
+        let result = get_template("daily_standup", "fr");
+        assert!(result.is_ok(), "fallback to EN must succeed");
+        let template = result.unwrap();
+        // EN template name should be ASCII (no Arabic chars)
+        let has_arabic = template.name.chars().any(|c| c >= '\u{0600}' && c <= '\u{06FF}');
+        assert!(!has_arabic, "fallback must return EN template, not AR");
+    }
+
+    #[test]
+    fn qa03_nonexistent_id_returns_error() {
+        // Case 3: Both missing -> error
+        let result = get_template("qa03_nonexistent_template", "ar");
+        assert!(result.is_err(), "nonexistent template must error");
+    }
 }
