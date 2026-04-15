@@ -5,6 +5,65 @@ use tauri::{
     AppHandle, Manager, Runtime,
 };
 
+// ---------------------------------------------------------------------------
+// Bilingual tray menu strings (UI-07, D-01, D-03)
+// ---------------------------------------------------------------------------
+
+pub struct TrayStrings {
+    pub downloading_model: &'static str,
+    pub start_recording: &'static str,
+    pub starting_recording: &'static str,
+    pub pause_recording: &'static str,
+    pub stop_recording: &'static str,
+    pub pausing: &'static str,
+    pub resume_recording: &'static str,
+    pub resuming: &'static str,
+    pub stopping: &'static str,
+    pub open_main_window: &'static str,
+    pub settings: &'static str,
+    pub check_for_updates: &'static str,
+    pub quit: &'static str,
+}
+
+pub const TRAY_EN: TrayStrings = TrayStrings {
+    downloading_model: "Downloading transcription model...",
+    start_recording: "Start Recording",
+    starting_recording: "Starting Recording...",
+    pause_recording: "Pause Recording",
+    stop_recording: "Stop Recording",
+    pausing: "Pausing...",
+    resume_recording: "Resume Recording",
+    resuming: "Resuming...",
+    stopping: "Stopping...",
+    open_main_window: "Open Main Window",
+    settings: "Settings",
+    check_for_updates: "Check for Updates",
+    quit: "Quit",
+};
+
+pub const TRAY_AR: TrayStrings = TrayStrings {
+    downloading_model: "جارٍ تنزيل نموذج النسخ...",
+    start_recording: "بدء التسجيل",
+    starting_recording: "جار بدء التسجيل...",
+    pause_recording: "إيقاف مؤقت",
+    stop_recording: "إيقاف التسجيل",
+    pausing: "جار الإيقاف المؤقت...",
+    resume_recording: "استئناف التسجيل",
+    resuming: "جار الاستئناف...",
+    stopping: "جار الإيقاف...",
+    open_main_window: "فتح النافذة الرئيسية",
+    settings: "الإعدادات",
+    check_for_updates: "التحقق من التحديثات",
+    quit: "إنهاء",
+};
+
+pub fn tray_strings(locale: &str) -> &'static TrayStrings {
+    match locale {
+        "ar" => &TRAY_AR,
+        _ => &TRAY_EN,
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum RecordingState {
     Stopped,
@@ -318,12 +377,15 @@ fn build_menu<R: Runtime>(
     state: RecordingState,
     can_record: bool, // True if recording is allowed (onboarding complete OR transcription model ready)
 ) -> tauri::Result<tauri::menu::Menu<R>> {
+    let locale = crate::preferences::read().ui_locale;
+    let s = tray_strings(&locale);
+
     let mut builder = MenuBuilder::new(app);
 
     // If recording is not allowed (during onboarding, no transcription model), show disabled message
     if !can_record {
         builder = builder.item(
-            &MenuItemBuilder::new("⏳ Downloading transcription model...")
+            &MenuItemBuilder::new(format!("⏳ {}", s.downloading_model))
                 .enabled(false)
                 .build(app)?,
         );
@@ -331,49 +393,49 @@ fn build_menu<R: Runtime>(
         match state {
             RecordingState::Stopped => {
                 builder = builder
-                    .item(&MenuItemBuilder::with_id("toggle_recording", "Start Recording").build(app)?);
+                    .item(&MenuItemBuilder::with_id("toggle_recording", s.start_recording).build(app)?);
             }
             RecordingState::Starting => {
                 builder = builder.item(
-                    &MenuItemBuilder::new("🔄 Starting Recording...")
+                    &MenuItemBuilder::new(format!("🔄 {}", s.starting_recording))
                         .enabled(false)
                         .build(app)?,
                 );
             }
             RecordingState::Recording => {
                 builder = builder
-                    .item(&MenuItemBuilder::with_id("pause_recording", "⏸ Pause Recording").build(app)?)
-                    .item(&MenuItemBuilder::with_id("stop_recording", "⏹ Stop Recording").build(app)?);
+                    .item(&MenuItemBuilder::with_id("pause_recording", format!("⏸ {}", s.pause_recording)).build(app)?)
+                    .item(&MenuItemBuilder::with_id("stop_recording", format!("⏹ {}", s.stop_recording)).build(app)?);
             }
             RecordingState::Pausing => {
                 builder = builder
                     .item(
-                        &MenuItemBuilder::new("⏸ Pausing...")
+                        &MenuItemBuilder::new(format!("⏸ {}", s.pausing))
                             .enabled(false)
                             .build(app)?,
                     )
-                    .item(&MenuItemBuilder::with_id("stop_recording", "⏹ Stop Recording").build(app)?);
+                    .item(&MenuItemBuilder::with_id("stop_recording", format!("⏹ {}", s.stop_recording)).build(app)?);
             }
             RecordingState::Paused => {
                 builder = builder
                     .item(
-                        &MenuItemBuilder::with_id("resume_recording", "▶ Resume Recording")
+                        &MenuItemBuilder::with_id("resume_recording", format!("▶ {}", s.resume_recording))
                             .build(app)?,
                     )
-                    .item(&MenuItemBuilder::with_id("stop_recording", "⏹ Stop Recording").build(app)?);
+                    .item(&MenuItemBuilder::with_id("stop_recording", format!("⏹ {}", s.stop_recording)).build(app)?);
             }
             RecordingState::Resuming => {
                 builder = builder
                     .item(
-                        &MenuItemBuilder::new("▶ Resuming...")
+                        &MenuItemBuilder::new(format!("▶ {}", s.resuming))
                             .enabled(false)
                             .build(app)?,
                     )
-                    .item(&MenuItemBuilder::with_id("stop_recording", "⏹ Stop Recording").build(app)?);
+                    .item(&MenuItemBuilder::with_id("stop_recording", format!("⏹ {}", s.stop_recording)).build(app)?);
             }
             RecordingState::Stopping => {
                 builder = builder.item(
-                    &MenuItemBuilder::new("⏹ Stopping...")
+                    &MenuItemBuilder::new(format!("⏹ {}", s.stopping))
                         .enabled(false)
                         .build(app)?,
                 );
@@ -383,11 +445,11 @@ fn build_menu<R: Runtime>(
 
     builder
         .item(&PredefinedMenuItem::separator(app)?)
-        .item(&MenuItemBuilder::with_id("open_window", "Open Main Window").build(app)?)
-        .item(&MenuItemBuilder::with_id("settings", "Settings").build(app)?)
-        .item(&MenuItemBuilder::with_id("check_updates", "Check for Updates").build(app)?)
+        .item(&MenuItemBuilder::with_id("open_window", s.open_main_window).build(app)?)
+        .item(&MenuItemBuilder::with_id("settings", s.settings).build(app)?)
+        .item(&MenuItemBuilder::with_id("check_updates", s.check_for_updates).build(app)?)
         .item(&PredefinedMenuItem::separator(app)?)
-        .item(&MenuItemBuilder::with_id("quit", "Quit").build(app)?)
+        .item(&MenuItemBuilder::with_id("quit", s.quit).build(app)?)
         .build()
 }
 
