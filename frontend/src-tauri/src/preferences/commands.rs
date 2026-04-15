@@ -6,7 +6,7 @@
 //! ordering is the T-1-02 mitigation — inverting it breaks T3 rollback
 //! invariance.
 
-use tauri::State;
+use tauri::{Emitter, Runtime, State};
 
 use crate::state::AppState;
 
@@ -21,10 +21,14 @@ pub async fn get_user_preferences() -> Result<UserPreferences, String> {
 }
 
 #[tauri::command]
-pub async fn set_user_preferences(
+pub async fn set_user_preferences<R: Runtime>(
+    app: tauri::AppHandle<R>,
     patch: UserPreferencesPatch,
     state: State<'_, AppState>,
 ) -> Result<UserPreferences, String> {
+    // Capture old locale BEFORE apply_patch_atomic for change detection (D-02)
+    let old_locale = super::read().ui_locale.clone();
+
     let pool = state.db_manager.pool();
 
     // Runs apply_patch_atomic: pre-flight load → merge → invariant pre-flight
@@ -48,6 +52,11 @@ pub async fn set_user_preferences(
             .write()
             .map_err(|_| "PREFS_CACHE poisoned".to_string())?;
         *guard = merged.clone();
+    }
+
+    // Emit locale-changed event when locale actually changed (D-02, T-06-03 guard)
+    if merged.ui_locale != old_locale {
+        let _ = app.emit("locale-changed", &merged.ui_locale);
     }
 
     Ok(merged)

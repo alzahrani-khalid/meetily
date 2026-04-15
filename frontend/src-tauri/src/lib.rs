@@ -59,7 +59,7 @@ use audio::{list_audio_devices, AudioDevice, trigger_audio_permission};
 use log::{error as log_error, info as log_info};
 use notifications::commands::NotificationManagerState;
 use std::sync::Arc;
-use tauri::{AppHandle, Manager, Runtime};
+use tauri::{AppHandle, Listener, Manager, Runtime};
 use tokio::sync::RwLock;
 
 static RECORDING_FLAG: AtomicBool = AtomicBool::new(false);
@@ -475,6 +475,15 @@ pub fn run() {
                 preferences::hydrate_from_db(state.db_manager.pool()).await
             })
             .expect("Failed to hydrate user preferences");
+
+            // Rebuild tray with correct locale now that preferences are hydrated
+            tray::update_tray_menu(_app.handle());
+
+            // Listen for future locale changes and rebuild tray (D-02)
+            let app_handle_for_tray = _app.handle().clone();
+            _app.handle().listen("locale-changed", move |_event| {
+                tray::update_tray_menu(&app_handle_for_tray);
+            });
 
             // Initialize bundled templates directory for dynamic template discovery
             log::info!("Initializing bundled templates directory...");
